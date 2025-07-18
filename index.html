@@ -28,67 +28,79 @@
         .card-border-fuchsia { border-top: 4px solid #d946ef; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<!-- CAMBIO: Body como flex-col para el footer -->
+<body class="flex flex-col min-h-screen p-4">
 
-    <div class="text-center p-8 max-w-7xl mx-auto">
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Laboratorio de Vectores</h1>
-        <p class="text-lg text-gray-400 mb-12">Selecciona una simulación para comenzar a explorar.</p>
+    <!-- CAMBIO: Contenedor principal que crece para empujar el footer hacia abajo -->
+    <main class="flex-grow flex items-center justify-center">
+        <div class="text-center p-8 max-w-7xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Laboratorio de Vectores</h1>
+            <p class="text-lg text-gray-400 mb-12">Selecciona una simulación para comenzar a explorar.</p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            
-            <!-- Card 1: Laboratorio 1D -->
-            <a href="./lab-1d.html" class="card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col no-underline card-border-cyan">
-                <div class="h-24 w-24 flex items-center justify-center mb-4">
-                    <!-- CAMBIO: Enlace a imagen local -->
-                    <img src="./icon-1d.png" alt="Icono de Laboratorio 1D" class="max-h-full max-w-full">
-                </div>
-                <h2 class="text-xl font-bold text-white mb-2">Laboratorio 1D</h2>
-                <p class="text-gray-400 text-sm mb-6 flex-grow">Suma vectores en una sola dimensión.</p>
-                <button class="bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-600 transition-colors w-full mt-auto">
-                    Entrar
-                </button>
-            </a>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                
+                <!-- Card 1: Laboratorio 1D -->
+                <a href="./lab-1d.html" class="card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col no-underline card-border-cyan">
+                    <!-- CAMBIO: mx-auto para centrar el div del icono -->
+                    <div class="h-24 w-24 flex items-center justify-center mb-4 mx-auto">
+                        <!-- CAMBIO: rounded-lg para redondear la imagen -->
+                        <img src="./icon-1d.png" alt="Icono de Laboratorio 1D" class="max-h-full max-w-full rounded-lg">
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-2">Laboratorio 1D</h2>
+                    <p class="text-gray-400 text-sm mb-6 flex-grow">Suma vectores en una sola dimensión.</p>
+                    <button class="bg-cyan-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-600 transition-colors w-full mt-auto">
+                        Entrar
+                    </button>
+                </a>
 
-            <!-- Card 2: Laboratorio 2D Cartesiano -->
-            <a href="./lab-2d-cartesian.html" class="card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col no-underline card-border-green">
-                <div class="h-24 w-24 flex items-center justify-center mb-4">
-                    <!-- CAMBIO: Enlace a imagen local -->
-                    <img src="./icon-2d-cartesian.png" alt="Icono de Laboratorio 2D Cartesiano" class="max-h-full max-w-full">
-                </div>
-                <h2 class="text-xl font-bold text-white mb-2">2D Cartesiano</h2>
-                <p class="text-gray-400 text-sm mb-6 flex-grow">Suma vectores con componentes (x, y).</p>
-                <button class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors w-full mt-auto">
-                    Entrar
-                </button>
-            </a>
-            
-            <!-- Card 3: Laboratorio 2D Polar -->
-            <a href="./lab-2d-polar.html" class="card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col no-underline card-border-yellow">
-                <div class="h-24 w-24 flex items-center justify-center mb-4">
-                    <!-- CAMBIO: Enlace a imagen local -->
-                    <img src="./icon-2d-polar.png" alt="Icono de Laboratorio 2D Polar" class="max-h-full max-w-full">
-                </div>
-                <h2 class="text-xl font-bold text-white mb-2">2D Polar</h2>
-                <p class="text-gray-400 text-sm mb-6 flex-grow">Usa módulo y ángulo para definir vectores.</p>
-                <button class="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors w-full mt-auto">
-                    Entrar
-                </button>
-            </a>
+                <!-- Card 2: Laboratorio 2D Cartesiano -->
+                <a href="./lab-2d-cartesian.html" class="card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col no-underline card-border-green">
+                    <div class="h-24 w-24 flex items-center justify-center mb-4 mx-auto">
+                        <img src="./icon-2d-cartesian.png" alt="Icono de Laboratorio 2D Cartesiano" class="max-h-full max-w-full rounded-lg">
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-2">2D Cartesiano</h2>
+                    <p class="text-gray-400 text-sm mb-6 flex-grow">Suma vectores con componentes (x, y).</p>
+                    <button class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors w-full mt-auto">
+                        Entrar
+                    </button>
+                </a>
+                
+                <!-- Card 3: Laboratorio 2D Polar -->
+                <a href="./lab-2d-polar.html" class="card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col no-underline card-border-yellow">
+                    <div class="h-24 w-24 flex items-center justify-center mb-4 mx-auto">
+                        <img src="./icon-2d-polar.png" alt="Icono de Laboratorio 2D Polar" class="max-h-full max-w-full rounded-lg">
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-2">2D Polar</h2>
+                    <p class="text-gray-400 text-sm mb-6 flex-grow">Usa módulo y ángulo para definir vectores.</p>
+                    <button class="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors w-full mt-auto">
+                        Entrar
+                    </button>
+                </a>
 
-            <!-- Card 4: Ecuaciones -->
-            <a href="./lab-equations.html" class="card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col no-underline card-border-fuchsia">
-                <div class="h-24 w-24 flex items-center justify-center mb-4">
-                    <!-- CAMBIO: Enlace a imagen local -->
-                    <img src="./icon-equations.png" alt="Icono de Ecuaciones" class="max-h-full max-w-full">
-                </div>
-                <h2 class="text-xl font-bold text-white mb-2">Ecuaciones</h2>
-                <p class="text-gray-400 text-sm mb-6 flex-grow">Visualiza la forma matemática.</p>
-                <button class="bg-fuchsia-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-fuchsia-600 transition-colors w-full mt-auto">
-                    Entrar
-                </button>
-            </a>
-
+                <!-- Card 4: Ecuaciones -->
+                <a href="./lab-equations.html" class="card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col no-underline card-border-fuchsia">
+                    <div class="h-24 w-24 flex items-center justify-center mb-4 mx-auto">
+                        <img src="./icon-equations.png" alt="Icono de Ecuaciones" class="max-h-full max-w-full rounded-lg">
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-2">Ecuaciones</h2>
+                    <p class="text-gray-400 text-sm mb-6 flex-grow">Visualiza la forma matemática.</p>
+                    <button class="bg-fuchsia-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-fuchsia-600 transition-colors w-full mt-auto">
+                        Entrar
+                    </button>
+                </a>
+            </div>
         </div>
-    </div>
+    </main>
+
+    <!-- CAMBIO: Footer añadido al final del body -->
+    <footer class="w-full text-center p-4">
+        <p class="text-xs text-gray-500">
+            Simulación creada por 
+            <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
+                AulaQuest
+            </a>
+        </p>
+    </footer>
+
 </body>
 </html>
