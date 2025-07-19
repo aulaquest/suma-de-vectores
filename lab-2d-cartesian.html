@@ -547,7 +547,8 @@
             });
         });
 
-        canvas.addEventListener('mousedown', (e) => {
+        function handleMouseDown(e) {
+            if (e.type === 'touchstart') e.preventDefault();
             const pos = getMousePos(e);
             let clickedOnItem = null;
 
@@ -580,7 +581,7 @@
             }
             
             draw();
-        });
+        }
 
         function isClickOnVector(pos, vec) {
             const start = worldToCanvas(vec.pos);
@@ -626,7 +627,8 @@
             return null;
         }
 
-        window.addEventListener('mousemove', (e) => {
+        function handleMouseMove(e) {
+            if (e.type === 'touchmove') e.preventDefault();
             const pos = getMousePos(e);
             let cursorSet = false;
             
@@ -673,9 +675,9 @@
                 }
                 draw();
             }
-        });
-
-        window.addEventListener('mouseup', (e) => {
+        }
+        
+        function handleMouseUp(e) {
             if (snapPoint && draggingState.item && draggingState.type === 'body') {
                 draggingState.item.pos = snapPoint;
             }
@@ -683,7 +685,8 @@
 
             if (draggingState.item && draggingState.item.id !== 's' && !draggingState.isNew) {
                 const panelRect = controlPanel.getBoundingClientRect();
-                if (e.clientX >= panelRect.left) {
+                const finalX = (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientX : e.clientX;
+                if (finalX >= panelRect.left) {
                     vectorsOnCanvas = vectorsOnCanvas.filter(v => v !== draggingState.item);
                     document.querySelector(`.source-vector[data-id="${draggingState.item.id}"]`).classList.remove('disabled');
                     if (selectedVector === draggingState.item) {
@@ -696,7 +699,7 @@
             isPanning = false;
             canvasContainer.classList.remove('grabbing');
             draw();
-        });
+        }
 
         [showSumCheck, showValuesCheck, showGridCheck, showAnglesCheck].forEach(el => el.addEventListener('change', draw));
         
@@ -728,8 +731,18 @@
         zoomOutBtn.addEventListener('click', () => { scale /= 1.2; draw(); });
 
         window.addEventListener('resize', init);
+        
+        // Eventos de ratón
+        canvas.addEventListener('mousedown', handleMouseDown);
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+        
+        // Eventos táctiles
+        canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
+        window.addEventListener('touchmove', handleMouseMove, { passive: false });
+        window.addEventListener('touchend', handleMouseUp);
+
         init();
     </script>
 </body>
 </html>
-
