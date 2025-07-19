@@ -49,67 +49,69 @@
             </div>
         </div>
 
-        <!-- Panel de Control: Estructura simplificada para garantizar el scroll en móvil -->
-        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-[40%] md:h-full md:w-[25%] p-4 overflow-y-auto">
-            
-            <div class="space-y-6">
-                <div>
-                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTA</h3>
-                    <div class="space-y-2">
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-angles" class="form-checkbox mr-2">Mostrar Ángulo</label>
+        <!-- Wrapper del Panel de Control: Este div establece el tamaño (40% de alto en móvil) -->
+        <div class="w-full h-[40%] md:h-full md:w-[25%]">
+            <!-- Panel de Control Interno: Este div ocupa el 100% del wrapper y tiene el scroll -->
+            <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-full p-4 overflow-y-auto">
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTA</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
+                            <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
+                            <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
+                            <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-angles" class="form-checkbox mr-2">Mostrar Ángulo</label>
+                        </div>
                     </div>
-                </div>
 
-                <div>
-                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">COMPONENTES</h3>
-                    <div class="space-y-2">
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-triangular-components" class="form-checkbox mr-2">Triangulares</label>
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-rectangular-components" class="form-checkbox mr-2">Rectangulares</label>
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-projection-components" class="form-checkbox mr-2">Proyección en Ejes</label>
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-parallelogram" class="form-checkbox mr-2">Paralelogramo</label>
+                    <div>
+                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">COMPONENTES</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-triangular-components" class="form-checkbox mr-2">Triangulares</label>
+                            <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-rectangular-components" class="form-checkbox mr-2">Rectangulares</label>
+                            <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-projection-components" class="form-checkbox mr-2">Proyección en Ejes</label>
+                            <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-parallelogram" class="form-checkbox mr-2">Paralelogramo</label>
+                        </div>
                     </div>
-                </div>
 
-                <div class="bg-gray-900/50 p-3 rounded-lg">
-                    <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="a" data-color="#48bb78" data-vx="5" data-vy="2">
-                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#48bb78" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#48bb78"/></svg>
+                    <div class="bg-gray-900/50 p-3 rounded-lg">
+                        <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="source-vector p-2 rounded-md cursor-grab" data-id="a" data-color="#48bb78" data-vx="5" data-vy="2">
+                                    <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#48bb78" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#48bb78"/></svg>
+                                </div>
+                                <span class="font-bold text-lg text-green-400">a</span>
                             </div>
-                            <span class="font-bold text-lg text-green-400">a</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="b" data-color="#4299e1" data-vx="2" data-vy="3">
-                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#4299e1" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#4299e1"/></svg>
+                            <div class="flex items-center justify-between">
+                                <div class="source-vector p-2 rounded-md cursor-grab" data-id="b" data-color="#4299e1" data-vx="2" data-vy="3">
+                                    <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#4299e1" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#4299e1"/></svg>
+                                </div>
+                                <span class="font-bold text-lg text-blue-400">b</span>
                             </div>
-                            <span class="font-bold text-lg text-blue-400">b</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="c" data-color="#f59e0b" data-vx="4" data-vy="1">
-                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#f59e0b" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#f59e0b"/></svg>
+                            <div class="flex items-center justify-between">
+                                <div class="source-vector p-2 rounded-md cursor-grab" data-id="c" data-color="#f59e0b" data-vx="4" data-vy="1">
+                                    <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#f59e0b" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#f59e0b"/></svg>
+                                </div>
+                                <span class="font-bold text-lg text-yellow-400">c</span>
                             </div>
-                            <span class="font-bold text-lg text-yellow-400">c</span>
                         </div>
                     </div>
+                     <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
                 </div>
-                 <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
-            </div>
-            
-            <!-- Footer del panel: ahora está dentro del flujo de scroll normal -->
-            <div class="text-center mt-6">
-                 <a href="./index.html" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors w-full inline-block">
-                     &larr; Volver al Menú Principal
-                 </a>
-                <p class="text-xs text-gray-500 mt-4">
-                    Simulación creada por 
-                    <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
-                        AulaQuest
-                    </a>
-                </p>
+                
+                <!-- Footer del panel: ahora está dentro del flujo de scroll normal -->
+                <div class="text-center mt-6">
+                     <a href="./index.html" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors w-full inline-block">
+                         &larr; Volver al Menú Principal
+                     </a>
+                    <p class="text-xs text-gray-500 mt-4">
+                        Simulación creada por 
+                        <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
+                            AulaQuest
+                        </a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
