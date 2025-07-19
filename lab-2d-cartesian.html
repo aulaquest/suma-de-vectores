@@ -33,7 +33,7 @@
 
     <div class="w-full h-full flex flex-col md:flex-row">
         
-        <div id="canvas-container" class="relative w-full h-[60%] md:h-full md:w-[75%]">
+        <div id="canvas-container" class="relative w-full h-[60vh] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex items-center space-x-2 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex flex-col w-full h-[40%] md:h-full md:w-[25%] overflow-y-auto">
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex flex-col w-full h-[40vh] md:h-full md:w-[25%] overflow-y-auto">
             <div class="flex-grow space-y-6">
                 <div>
                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTA</h3>
@@ -715,7 +715,7 @@
             if (draggingState.item && draggingState.item.id !== 's' && !draggingState.isNew) {
                 const panelRect = controlPanel.getBoundingClientRect();
                 const finalX = (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientX : e.clientX;
-                if (finalX >= panelRect.left) {
+                if (finalX >= panelRect.left && !isTouchDevice) {
                     vectorsOnCanvas = vectorsOnCanvas.filter(v => v !== draggingState.item);
                     document.querySelector(`.source-vector[data-id="${draggingState.item.id}"]`).classList.remove('disabled');
                     if (selectedVector === draggingState.item) {
