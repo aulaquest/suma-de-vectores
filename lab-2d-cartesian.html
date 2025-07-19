@@ -1,1 +1,735 @@
-hola 2
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio 2D Cartesiano - Adición de Vectores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden; /* Evita el scroll de la página entera */
+        }
+        #canvas-container { cursor: grab; }
+        #canvas-container.grabbing { cursor: grabbing; }
+        .source-vector.disabled { opacity: 0.4; cursor: not-allowed; }
+        .form-checkbox {
+            -webkit-appearance: none; appearance: none;
+            background-color: #4a5568; border: 1px solid #718096;
+            border-radius: 0.25rem; width: 1em; height: 1em;
+            display: inline-block; vertical-align: middle;
+            position: relative; cursor: pointer;
+        }
+        .form-checkbox:checked { background-color: #4fd1c5; border-color: #4fd1c5; }
+        .form-checkbox:checked::after {
+            content: '✔'; position: absolute; color: #1a202c;
+            font-size: 0.8em; left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex h-screen">
+
+    <!-- CAMBIO: Contenedor principal ahora es flex-col y md:flex-row para responsive -->
+    <div class="w-full h-full flex flex-col md:flex-row">
+        
+        <!-- Columna de Simulación -->
+        <!-- CAMBIO: Ancho/alto ajustado para responsive -->
+        <div id="canvas-container" class="relative w-full h-[60vh] md:h-full md:w-[75%]">
+            <canvas id="vectorCanvas"></canvas>
+            <div id="component-display" class="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex items-center space-x-2 text-xs backdrop-blur-sm border border-gray-700">
+                <!-- Contenido dinámico aquí -->
+            </div>
+            <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
+                <button id="zoom-in-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">+</button>
+                <button id="zoom-out-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">-</button>
+            </div>
+        </div>
+
+        <!-- Columna de Panel de Control -->
+        <!-- CAMBIO: Ancho/alto ajustado para responsive -->
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex flex-col overflow-y-auto w-full h-[40vh] md:h-full md:w-[25%]">
+            <div class="flex-grow space-y-6">
+                <div>
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTA</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-angles" class="form-checkbox mr-2">Mostrar Ángulo</label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">COMPONENTES</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-triangular-components" class="form-checkbox mr-2">Triangulares</label>
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-rectangular-components" class="form-checkbox mr-2">Rectangulares</label>
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-projection-components" class="form-checkbox mr-2">Proyección en Ejes</label>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900/50 p-3 rounded-lg">
+                    <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="a" data-color="#48bb78" data-vx="5" data-vy="2">
+                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#48bb78" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#48bb78"/></svg>
+                            </div>
+                            <span class="font-bold text-lg text-green-400">a</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="b" data-color="#4299e1" data-vx="2" data-vy="3">
+                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#4299e1" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#4299e1"/></svg>
+                            </div>
+                            <span class="font-bold text-lg text-blue-400">b</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="c" data-color="#f59e0b" data-vx="4" data-vy="1">
+                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#f59e0b" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#f59e0b"/></svg>
+                            </div>
+                            <span class="font-bold text-lg text-yellow-400">c</span>
+                        </div>
+                    </div>
+                </div>
+                 <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
+            </div>
+            <!-- CAMBIO: Footer rediseñado -->
+            <div class="text-center mt-auto pt-4">
+                 <a href="./index.html" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors w-full inline-block">
+                    &larr; Volver al Menú Principal
+                </a>
+                <p class="text-xs text-gray-500 mt-4">
+                    Simulación creada por 
+                    <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
+                        AulaQuest
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('vectorCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvas-container');
+        const componentDisplay = document.getElementById('component-display');
+        const controlPanel = document.getElementById('control-panel');
+        
+        const showSumCheck = document.getElementById('show-sum');
+        const showValuesCheck = document.getElementById('show-values');
+        const showGridCheck = document.getElementById('show-grid');
+        const showAnglesCheck = document.getElementById('show-angles');
+        const showTriangularComponentsCheck = document.getElementById('show-triangular-components');
+        const showRectangularComponentsCheck = document.getElementById('show-rectangular-components');
+        const showProjectionComponentsCheck = document.getElementById('show-projection-components');
+        const resetBtn = document.getElementById('reset-btn');
+        const sourceVectors = document.querySelectorAll('.source-vector');
+        const zoomInBtn = document.getElementById('zoom-in-btn');
+        const zoomOutBtn = document.getElementById('zoom-out-btn');
+
+        let scale = 30;
+        let origin = { x: 0, y: 0 };
+        let vectorsOnCanvas = [];
+        let sumVector = { id: 's', value: {x: 0, y: 0}, pos: { x: 0, y: 0 }, color: '#d946ef' };
+        let selectedVector = null;
+        let draggingState = { item: null, type: null, isNew: false };
+        let isPanning = false;
+        let panStart = { x: 0, y: 0 };
+        let snapPoint = null;
+
+        function worldToCanvas(worldPos) {
+            return { x: origin.x + worldPos.x * scale, y: origin.y - worldPos.y * scale };
+        }
+        function canvasToWorld(canvasPos) {
+            return { x: (canvasPos.x - origin.x) / scale, y: (origin.y - canvasPos.y) / scale };
+        }
+
+        function init() {
+            canvas.width = canvasContainer.clientWidth;
+            canvas.height = canvasContainer.clientHeight;
+            origin = { x: 50, y: canvas.height - 50 };
+            vectorsOnCanvas = [];
+            selectedVector = null;
+            sumVector.pos = { x: 0, y: 0 }; 
+            sourceVectors.forEach(el => el.classList.remove('disabled'));
+            draw();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#1a202c';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (showGridCheck.checked) {
+                drawGrid();
+                drawAxisNumbers();
+            }
+            drawAxis();
+
+            let sumX = 0, sumY = 0;
+            vectorsOnCanvas.forEach((v, index) => {
+                drawVector(v, false, index);
+                sumX += v.value.x;
+                sumY += v.value.y;
+            });
+            
+            sumVector.value = { x: sumX, y: sumY };
+
+            if (showSumCheck.checked && vectorsOnCanvas.length > 0) {
+                drawVector(sumVector, true, vectorsOnCanvas.length);
+            }
+            
+            if (snapPoint) {
+                drawSnapPoint(snapPoint);
+            }
+
+            updateComponentDisplay();
+        }
+        
+        function drawValueBox(text, x, y, color, isTransparent = false) {
+            ctx.font = 'bold 12px Inter';
+            const textMetrics = ctx.measureText(text);
+            const boxWidth = textMetrics.width + 16;
+            const boxHeight = 24;
+            const boxX = x - boxWidth / 2;
+            const boxY = y - boxHeight - 5;
+
+            if (isTransparent) {
+                ctx.fillStyle = color;
+                ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                ctx.lineWidth = 3;
+                ctx.lineJoin = "round";
+                ctx.strokeText(text, x, boxY + boxHeight / 2);
+                ctx.fillText(text, x, boxY + boxHeight / 2);
+
+            } else {
+                ctx.fillStyle = '#fefce8';
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.roundRect(boxX, boxY, boxWidth, boxHeight, [6]);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.fillStyle = '#1e293b';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, x, boxY + boxHeight / 2);
+            }
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = '#2d3748';
+            ctx.lineWidth = 0.5;
+            for (let x = origin.x % scale; x < canvas.width; x += scale) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+             for (let x = origin.x % scale; x > 0; x -= scale) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = origin.y % scale; y > 0; y -= scale) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+             for (let y = origin.y % scale; y < canvas.height; y += scale) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+        }
+        
+        function drawAxisNumbers() {
+            ctx.font = '10px Inter';
+            ctx.fillStyle = '#718096';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let i = 1; origin.x + i * scale < canvas.width; i++) {
+                ctx.fillText(i, origin.x + i * scale, origin.y + 15);
+            }
+            for (let i = -1; origin.x + i * scale > 0; i--) {
+                ctx.fillText(i, origin.x + i * scale, origin.y + 15);
+            }
+            for (let i = 1; origin.y - i * scale > 0; i++) {
+                ctx.fillText(i, origin.x - 15, origin.y - i * scale);
+            }
+            for (let i = -1; origin.y - i * scale < canvas.height; i--) {
+                ctx.fillText(i, origin.x - 15, origin.y - i * scale);
+            }
+        }
+
+        function drawAxis() {
+            ctx.strokeStyle = '#718096';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, origin.y); ctx.lineTo(canvas.width, origin.y); // X-axis
+            ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, canvas.height); // Y-axis
+            ctx.stroke();
+            
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.arc(origin.x, origin.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.font = 'bold 14px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('x', canvas.width - 20, origin.y - 15);
+            ctx.fillText('y', origin.x + 15, 20);
+        }
+
+        function drawVector(vec, isSum = false, index = 0) {
+            const start = worldToCanvas(vec.pos);
+            const end = getVectorEndCanvas(vec);
+
+            if (showTriangularComponentsCheck.checked && (!isSum || vectorsOnCanvas.length > 0)) {
+                drawTriangularComponents(vec);
+            }
+            if (showRectangularComponentsCheck.checked && (!isSum || vectorsOnCanvas.length > 0)) {
+                drawRectangularComponents(vec);
+            }
+            if (showProjectionComponentsCheck.checked && (!isSum || vectorsOnCanvas.length > 0)) {
+                drawProjectionComponents(vec, index);
+            }
+
+            if (vec === selectedVector) {
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 8;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.stroke();
+                ctx.lineCap = 'butt';
+            }
+
+            ctx.strokeStyle = vec.color;
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.stroke();
+
+            if (!isSum) {
+                ctx.fillStyle = vec.color;
+                ctx.strokeStyle = '#1a202c';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(start.x, start.y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            if (showAnglesCheck.checked && (vec.value.x !== 0 || vec.value.y !== 0)) {
+                drawAngle(vec);
+            }
+
+            ctx.fillStyle = vec.color;
+            const angle = Math.atan2(end.y - start.y, end.x - start.x);
+            const headlen = 14;
+            ctx.beginPath();
+            ctx.moveTo(end.x, end.y);
+            ctx.lineTo(end.x - headlen * Math.cos(angle - Math.PI / 6), end.y - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(end.x - headlen * Math.cos(angle + Math.PI / 6), end.y - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+
+            if (showValuesCheck.checked) {
+                const mag = Math.hypot(vec.value.x, vec.value.y);
+                const text = `|${vec.id}| = ${mag.toFixed(1)}`;
+                drawValueBox(text, (start.x + end.x) / 2, (start.y + end.y) / 2, vec.color, true);
+            }
+        }
+        
+        function drawAngle(vec) {
+            const start = worldToCanvas(vec.pos);
+            const angle = Math.atan2(-vec.value.y, vec.value.x);
+            const radius = 25;
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(start.x + radius + 5, start.y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(start.x, start.y, radius, 0, angle, angle < 0);
+            ctx.stroke();
+            
+            let angleDeg = Math.atan2(vec.value.y, vec.value.x) * 180 / Math.PI;
+
+            ctx.fillStyle = 'white';
+            ctx.font = '11px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const textAngle = angle / 2;
+            const textX = start.x + (radius + 15) * Math.cos(textAngle);
+            const textY = start.y + (radius + 15) * Math.sin(textAngle);
+            ctx.fillText(`${angleDeg.toFixed(1)}°`, textX, textY);
+        }
+        
+        function drawTriangularComponents(vec) {
+            const start = worldToCanvas(vec.pos);
+            const end = getVectorEndCanvas(vec);
+            const corner = { x: end.x, y: start.y };
+
+            ctx.strokeStyle = vec.color;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(corner.x, corner.y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(corner.x, corner.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.stroke();
+
+            ctx.setLineDash([]);
+
+            if (showValuesCheck.checked) {
+                ctx.fillStyle = vec.color;
+                ctx.font = '11px Inter';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(vec.value.x.toFixed(1), (start.x + corner.x) / 2, corner.y - 10);
+                ctx.textAlign = vec.value.x > 0 ? 'left' : 'right';
+                ctx.fillText(vec.value.y.toFixed(1), corner.x + (vec.value.x > 0 ? 5 : -5), (corner.y + end.y) / 2);
+            }
+        }
+
+        function drawRectangularComponents(vec) {
+            const vecX = { id: `${vec.id}x`, value: {x: vec.value.x, y: 0}, pos: vec.pos, color: vec.color };
+            const vecY = { id: `${vec.id}y`, value: {x: 0, y: vec.value.y}, pos: vec.pos, color: vec.color };
+            
+            drawComponentVector(vecX);
+            drawComponentVector(vecY);
+        }
+
+        function drawProjectionComponents(vec, index) {
+            const start = worldToCanvas(vec.pos);
+            const end = getVectorEndCanvas(vec);
+            const offset = (index + 1) * 10;
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath();
+            ctx.moveTo(end.x, end.y);
+            ctx.lineTo(end.x, origin.y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(end.x, end.y);
+            ctx.lineTo(origin.x, end.y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(start.x, origin.y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(origin.x, start.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const vecX = { id: `${vec.id}x`, value: {x: vec.value.x, y: 0}, pos: canvasToWorld({x: start.x, y: origin.y + offset}), color: vec.color };
+            const vecY = { id: `${vec.id}y`, value: {x: 0, y: vec.value.y}, pos: canvasToWorld({x: origin.x - offset, y: start.y}), color: vec.color };
+            drawComponentVector(vecX);
+            drawComponentVector(vecY);
+        }
+
+        function drawComponentVector(vec) {
+            const start = worldToCanvas(vec.pos);
+            const end = getVectorEndCanvas(vec);
+
+            ctx.strokeStyle = vec.color;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const angle = Math.atan2(end.y - start.y, end.x - start.x);
+            const headlen = 10;
+            ctx.fillStyle = vec.color;
+            ctx.beginPath();
+            ctx.moveTo(end.x, end.y);
+            ctx.lineTo(end.x - headlen * Math.cos(angle - Math.PI / 6), end.y - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(end.x - headlen * Math.cos(angle + Math.PI / 6), end.y - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+            
+            if (showValuesCheck.checked) {
+                const value = vec.value.x !== 0 ? vec.value.x : vec.value.y;
+                const text = value.toFixed(1);
+                const textColor = vec.color;
+                if (vec.value.x !== 0) {
+                    drawValueBox(text, (start.x + end.x) / 2, start.y, textColor, true);
+                } else {
+                    drawValueBox(text, start.x, (start.y + end.y) / 2, textColor, true);
+                }
+            }
+        }
+
+        function drawSnapPoint(point) {
+            const canvasPoint = worldToCanvas(point);
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(canvasPoint.x, canvasPoint.y, 10, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function updateComponentDisplay() {
+            if (selectedVector) {
+                const vec = selectedVector;
+                const mag = Math.hypot(vec.value.x, vec.value.y).toFixed(1);
+                let angle = Math.atan2(vec.value.y, vec.value.x) * 180 / Math.PI;
+                
+                const componentX = vec.value.x.toFixed(1);
+                const componentY = vec.value.y.toFixed(1);
+                const vecId = vec.id;
+                
+                componentDisplay.innerHTML = `
+                    <span class="font-bold" style="color: ${vec.color};">|${vecId}|</span>
+                    <input type="text" readonly value="${mag}" class="w-12 text-center bg-gray-700 rounded border border-gray-600 text-white text-xs">
+                    <span class="font-bold text-gray-400">θ</span>
+                    <input type="text" readonly value="${angle.toFixed(1)}°" class="w-12 text-center bg-gray-700 rounded border border-gray-600 text-white text-xs">
+                    <span class="font-bold text-gray-400">${vecId}<sub>x</sub></span>
+                    <input type="text" readonly value="${componentX}" class="w-12 text-center bg-gray-700 rounded border border-gray-600 text-white text-xs">
+                    <span class="font-bold text-gray-400">${vecId}<sub>y</sub></span>
+                    <input type="text" readonly value="${componentY}" class="w-12 text-center bg-gray-700 rounded border border-gray-600 text-white text-xs">
+                `;
+                componentDisplay.classList.remove('hidden');
+            } else {
+                componentDisplay.classList.add('hidden');
+            }
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+        
+        sourceVectors.forEach(el => {
+            el.addEventListener('mousedown', (e) => {
+                if (el.classList.contains('disabled')) return;
+                e.preventDefault();
+                
+                const newVector = {
+                    id: el.dataset.id,
+                    value: { x: parseFloat(el.dataset.vx), y: parseFloat(el.dataset.vy) },
+                    color: el.dataset.color,
+                    pos: canvasToWorld({ x: canvas.width / 2, y: canvas.height / 2 })
+                };
+                
+                vectorsOnCanvas.push(newVector);
+                selectedVector = newVector;
+                draggingState = { item: newVector, type: 'body', isNew: true };
+                el.classList.add('disabled');
+                
+                draw();
+            });
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            const pos = getMousePos(e);
+            let clickedOnItem = null;
+
+            const allDrawableVectors = [...vectorsOnCanvas];
+            if (showSumCheck.checked && vectorsOnCanvas.length > 0) allDrawableVectors.push(sumVector);
+
+            for (let i = allDrawableVectors.length - 1; i >= 0; i--) {
+                if (isClickOnVector(pos, allDrawableVectors[i])) {
+                    clickedOnItem = allDrawableVectors[i];
+                    break;
+                }
+            }
+
+            selectedVector = clickedOnItem;
+            
+            if (selectedVector) {
+                draggingState.isNew = false;
+                if (selectedVector.id === 's') {
+                    draggingState.item = selectedVector;
+                    draggingState.type = 'body';
+                } else {
+                    const end = getVectorEndCanvas(selectedVector);
+                    const headDist = Math.hypot(pos.x - end.x, pos.y - end.y);
+                    draggingState = { item: selectedVector, type: headDist < 15 ? 'head' : 'body' };
+                }
+            } else {
+                isPanning = true;
+                panStart = pos;
+                canvasContainer.classList.add('grabbing');
+            }
+            
+            draw();
+        });
+
+        function isClickOnVector(pos, vec) {
+            const start = worldToCanvas(vec.pos);
+            const end = getVectorEndCanvas(vec);
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            if (dx === 0 && dy === 0) return Math.hypot(pos.x - start.x, pos.y - start.y) < 10;
+            
+            const t = ((pos.x - start.x) * dx + (pos.y - start.y) * dy) / (dx * dx + dy * dy);
+            const clampedT = Math.max(0, Math.min(1, t));
+            const closestX = start.x + clampedT * dx;
+            const closestY = start.y + clampedT * dy;
+            const dist = Math.hypot(pos.x - closestX, pos.y - closestY);
+
+            return dist < 10;
+        }
+
+        function getVectorEnd_World(vec) {
+            return {
+                x: vec.pos.x + vec.value.x,
+                y: vec.pos.y + vec.value.y
+            };
+        }
+        function getVectorEndCanvas(vec) {
+            return worldToCanvas(getVectorEnd_World(vec));
+        }
+
+        function checkForSnap(draggedVec) {
+            const snapThreshold = 15 / scale; // Threshold in world units
+            const potentialSnapPoints = [{x:0, y:0}]; // Origin
+            vectorsOnCanvas.forEach(v => {
+                if (v !== draggedVec) {
+                    potentialSnapPoints.push(v.pos); // Cola
+                    potentialSnapPoints.push(getVectorEnd_World(v)); // Punta
+                }
+            });
+
+            for (const point of potentialSnapPoints) {
+                if (Math.hypot(draggedVec.pos.x - point.x, draggedVec.pos.y - point.y) < snapThreshold) {
+                    return point;
+                }
+            }
+            return null;
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            const pos = getMousePos(e);
+            let cursorSet = false;
+            
+            if (isPanning) {
+                const dx = pos.x - panStart.x;
+                const dy = pos.y - panStart.y;
+                origin.x += dx;
+                origin.y += dy;
+                panStart = pos;
+                draw();
+                return;
+            }
+
+            if (!draggingState.item) {
+                 const allDrawableVectors = [...vectorsOnCanvas];
+                if (showSumCheck.checked && vectorsOnCanvas.length > 0) allDrawableVectors.push(sumVector);
+
+                for (const v of allDrawableVectors) {
+                    const end = getVectorEndCanvas(v);
+                    const headDist = Math.hypot(pos.x - end.x, pos.y - end.y);
+                    if (v.id !== 's' && headDist < 15) {
+                        canvasContainer.style.cursor = 'crosshair';
+                        cursorSet = true;
+                        break;
+                    } else if (isClickOnVector(pos, v)) {
+                        canvasContainer.style.cursor = 'move';
+                        cursorSet = true;
+                        break;
+                    }
+                }
+                if (!cursorSet) canvasContainer.style.cursor = 'grab';
+            }
+
+            if (draggingState.item) {
+                const mouseWorldPos = canvasToWorld(pos);
+                if (draggingState.isNew) {
+                    draggingState.item.pos = mouseWorldPos;
+                } else if (draggingState.type === 'head') {
+                    draggingState.item.value.x = mouseWorldPos.x - draggingState.item.pos.x;
+                    draggingState.item.value.y = mouseWorldPos.y - draggingState.item.pos.y;
+                } else if (draggingState.type === 'body') {
+                    draggingState.item.pos = mouseWorldPos;
+                    snapPoint = checkForSnap(draggingState.item);
+                }
+                draw();
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (snapPoint && draggingState.item && draggingState.type === 'body') {
+                draggingState.item.pos = snapPoint;
+            }
+            snapPoint = null;
+
+            if (draggingState.item && draggingState.item.id !== 's' && !draggingState.isNew) {
+                const panelRect = controlPanel.getBoundingClientRect();
+                if (e.clientX >= panelRect.left) {
+                    vectorsOnCanvas = vectorsOnCanvas.filter(v => v !== draggingState.item);
+                    document.querySelector(`.source-vector[data-id="${draggingState.item.id}"]`).classList.remove('disabled');
+                    if (selectedVector === draggingState.item) {
+                        selectedVector = null;
+                    }
+                }
+            }
+            
+            draggingState = { item: null, type: null, isNew: false };
+            isPanning = false;
+            canvasContainer.classList.remove('grabbing');
+            draw();
+        });
+
+        [showSumCheck, showValuesCheck, showGridCheck, showAnglesCheck].forEach(el => el.addEventListener('change', draw));
+        
+        showTriangularComponentsCheck.addEventListener('change', () => {
+            if (showTriangularComponentsCheck.checked) {
+                showRectangularComponentsCheck.checked = false;
+                showProjectionComponentsCheck.checked = false;
+            }
+            draw();
+        });
+        showRectangularComponentsCheck.addEventListener('change', () => {
+            if (showRectangularComponentsCheck.checked) {
+                showTriangularComponentsCheck.checked = false;
+                showProjectionComponentsCheck.checked = false;
+            }
+            draw();
+        });
+        showProjectionComponentsCheck.addEventListener('change', () => {
+            if (showProjectionComponentsCheck.checked) {
+                showTriangularComponentsCheck.checked = false;
+                showRectangularComponentsCheck.checked = false;
+            }
+            draw();
+        });
+        
+        resetBtn.addEventListener('click', init);
+        
+        zoomInBtn.addEventListener('click', () => { scale *= 1.2; draw(); });
+        zoomOutBtn.addEventListener('click', () => { scale /= 1.2; draw(); });
+
+        window.addEventListener('resize', init);
+        init();
+    </script>
+</body>
+</html>
+
