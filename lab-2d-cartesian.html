@@ -9,7 +9,7 @@
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            overflow: hidden;
+            /* CAMBIO: Se quita overflow: hidden para permitir scroll en móvil */
         }
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
@@ -29,11 +29,13 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 flex h-screen">
+<body class="bg-gray-900 text-gray-200">
 
-    <div class="w-full h-full flex flex-col md:flex-row">
+    <!-- CAMBIO: Contenedor principal rediseñado para un responsive robusto -->
+    <div class="w-full h-screen flex flex-col md:flex-row">
         
-        <div id="canvas-container" class="relative w-full h-[60%] md:h-full md:w-[75%]">
+        <!-- Columna de Simulación -->
+        <div id="canvas-container" class="relative w-full flex-grow md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex items-center space-x-2 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -44,7 +46,8 @@
             </div>
         </div>
 
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex flex-col w-full h-[40%] md:h-full md:w-[25%] overflow-y-auto">
+        <!-- Columna de Panel de Control -->
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex flex-col w-full md:w-[25%] md:h-full overflow-y-auto">
             <div class="flex-grow space-y-6">
                 <div>
                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTA</h3>
@@ -62,6 +65,8 @@
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-triangular-components" class="form-checkbox mr-2">Triangulares</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-rectangular-components" class="form-checkbox mr-2">Rectangulares</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-projection-components" class="form-checkbox mr-2">Proyección en Ejes</label>
+                        <!-- CAMBIO: Nuevo checkbox para paralelogramo -->
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-parallelogram" class="form-checkbox mr-2">Paralelogramo</label>
                     </div>
                 </div>
 
@@ -118,6 +123,7 @@
         const showTriangularComponentsCheck = document.getElementById('show-triangular-components');
         const showRectangularComponentsCheck = document.getElementById('show-rectangular-components');
         const showProjectionComponentsCheck = document.getElementById('show-projection-components');
+        const showParallelogramCheck = document.getElementById('show-parallelogram');
         const resetBtn = document.getElementById('reset-btn');
         const sourceVectors = document.querySelectorAll('.source-vector');
         const zoomInBtn = document.getElementById('zoom-in-btn');
@@ -132,6 +138,7 @@
         let isPanning = false;
         let panStart = { x: 0, y: 0 };
         let snapPoint = null;
+        const isTouchDevice = 'ontouchstart' in window;
 
         function worldToCanvas(worldPos) {
             return { x: origin.x + worldPos.x * scale, y: origin.y - worldPos.y * scale };
@@ -161,6 +168,10 @@
                 drawAxisNumbers();
             }
             drawAxis();
+            
+            if (showParallelogramCheck.checked && vectorsOnCanvas.length >= 2) {
+                drawParallelogram();
+            }
 
             let sumX = 0, sumY = 0;
             vectorsOnCanvas.forEach((v, index) => {
@@ -275,13 +286,13 @@
             const start = worldToCanvas(vec.pos);
             const end = getVectorEndCanvas(vec);
 
-            if (showTriangularComponentsCheck.checked && (!isSum || vectorsOnCanvas.length > 0)) {
+            if (showTriangularComponentsCheck.checked && !isSum) {
                 drawTriangularComponents(vec);
             }
-            if (showRectangularComponentsCheck.checked && (!isSum || vectorsOnCanvas.length > 0)) {
+            if (showRectangularComponentsCheck.checked && !isSum) {
                 drawRectangularComponents(vec);
             }
-            if (showProjectionComponentsCheck.checked && (!isSum || vectorsOnCanvas.length > 0)) {
+            if (showProjectionComponentsCheck.checked && !isSum) {
                 drawProjectionComponents(vec, index);
             }
 
@@ -433,6 +444,34 @@
             const vecY = { id: `${vec.id}y`, value: {x: 0, y: vec.value.y}, pos: canvasToWorld({x: origin.x - offset, y: start.y}), color: vec.color };
             drawComponentVector(vecX);
             drawComponentVector(vecY);
+        }
+
+        function drawParallelogram() {
+            const vec1 = vectorsOnCanvas[0];
+            const vec2 = vectorsOnCanvas[1];
+
+            if(vec1.pos.x !== vec2.pos.x || vec1.pos.y !== vec2.pos.y) return;
+
+            const start = worldToCanvas(vec1.pos);
+            const end1 = getVectorEndCanvas(vec1);
+            const end2 = getVectorEndCanvas(vec2);
+            const endSum = getVectorEndCanvas(sumVector);
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+
+            ctx.beginPath();
+            ctx.moveTo(end1.x, end1.y);
+            ctx.lineTo(endSum.x, endSum.y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(end2.x, end2.y);
+            ctx.lineTo(endSum.x, endSum.y);
+            ctx.stroke();
+
+            ctx.setLineDash([]);
         }
 
         function drawComponentVector(vec) {
@@ -701,6 +740,7 @@
             if (showTriangularComponentsCheck.checked) {
                 showRectangularComponentsCheck.checked = false;
                 showProjectionComponentsCheck.checked = false;
+                showParallelogramCheck.checked = false;
             }
             draw();
         });
@@ -708,6 +748,7 @@
             if (showRectangularComponentsCheck.checked) {
                 showTriangularComponentsCheck.checked = false;
                 showProjectionComponentsCheck.checked = false;
+                showParallelogramCheck.checked = false;
             }
             draw();
         });
@@ -715,6 +756,15 @@
             if (showProjectionComponentsCheck.checked) {
                 showTriangularComponentsCheck.checked = false;
                 showRectangularComponentsCheck.checked = false;
+                showParallelogramCheck.checked = false;
+            }
+            draw();
+        });
+        showParallelogramCheck.addEventListener('change', () => {
+            if (showParallelogramCheck.checked) {
+                showTriangularComponentsCheck.checked = false;
+                showRectangularComponentsCheck.checked = false;
+                showProjectionComponentsCheck.checked = false;
             }
             draw();
         });
