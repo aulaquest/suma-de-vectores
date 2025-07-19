@@ -51,7 +51,8 @@
         </div>
 
         <!-- Panel de Control: en móvil ocupa 40% de la altura con scroll independiente. En escritorio, ocupa el 25% del ancho -->
-        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-[40%] md:h-full md:w-[25%] p-4 overflow-y-auto">
+        <!-- CAMBIO: Se añadió `min-h-0` para arreglar el problema de overflow en flexbox en móviles. -->
+        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-[40%] md:h-full md:w-[25%] p-4 overflow-y-auto min-h-0">
             
             <div class="space-y-6">
                 <div>
@@ -103,7 +104,7 @@
             <!-- Footer del panel: ahora está dentro del flujo de scroll normal -->
             <div class="text-center mt-6">
                  <a href="./index.html" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors w-full inline-block">
-                     &larr; Volver al Menú Principal
+                      &larr; Volver al Menú Principal
                  </a>
                 <p class="text-xs text-gray-500 mt-4">
                     Simulación creada por 
