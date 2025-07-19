@@ -1,1 +1,497 @@
-hola
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio 1D - Adición de Vectores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            min-height: 100vh;
+        }
+        #canvas-container { cursor: grab; }
+        #canvas-container.grabbing { cursor: grabbing; }
+        .source-vector.disabled { opacity: 0.4; cursor: not-allowed; }
+        .form-checkbox {
+            -webkit-appearance: none; appearance: none;
+            background-color: #4a5568; border: 1px solid #718096;
+            border-radius: 0.25rem; width: 1em; height: 1em;
+            display: inline-block; vertical-align: middle;
+            position: relative; cursor: pointer;
+        }
+        .form-checkbox:checked { background-color: #4fd1c5; border-color: #4fd1c5; }
+        .form-checkbox:checked::after {
+            content: '✔'; position: absolute; color: #1a202c;
+            font-size: 0.8em; left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex flex-col">
+
+    <div class="w-full flex-grow flex flex-col">
+        
+        <div id="canvas-container" class="relative w-full" style="height: 60vh; min-height: 350px;">
+            <canvas id="vectorCanvas"></canvas>
+            <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex items-center space-x-2 text-xs backdrop-blur-sm border border-gray-700">
+                <!-- Contenido dinámico aquí -->
+            </div>
+            <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
+                <button id="zoom-in-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">+</button>
+                <button id="zoom-out-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">-</button>
+            </div>
+        </div>
+
+        <div id="control-panel" class="bg-gray-900 p-4 w-full border-t-2 border-cyan-800" style="height: 40vh;">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto pb-8">
+
+                <div class="flex flex-col space-y-3">
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTA</h3>
+                    <!-- CAMBIO: Checkboxes desactivados por defecto -->
+                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
+                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
+                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
+                </div>
+
+                <div class="flex flex-col space-y-3">
+                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">CONTROLES</h3>
+                     <div class="flex space-x-2">
+                        <button id="orient-h" class="w-full text-xs bg-cyan-600 font-bold py-2 rounded-md transition-colors opacity-50" disabled>Horizontal</button>
+                        <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
+                     </div>
+                     <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
+                </div>
+
+                <div class="bg-gray-800/50 p-3 rounded-lg">
+                    <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-center">
+                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="a" data-color="#48bb78" data-value="5">
+                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#48bb78" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#48bb78"/></svg>
+                            </div>
+                            <span class="font-bold text-sm text-green-400 ml-4">Vector a</span>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="b" data-color="#4299e1" data-value="3">
+                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#4299e1" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#4299e1"/></svg>
+                            </div>
+                            <span class="font-bold text-sm text-blue-400 ml-4">Vector b</span>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="c" data-color="#f59e0b" data-value="2">
+                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#f59e0b" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#f59e0b"/></svg>
+                            </div>
+                            <span class="font-bold text-sm text-yellow-400 ml-4">Vector c</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-gray-900 p-4 w-full border-t border-gray-700 mt-auto">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-center md:text-left">
+            <div>
+                <a href="./index.html" class="text-cyan-400 hover:text-cyan-300 transition-colors">&larr; Volver al Menú Principal</a>
+            </div>
+            <div class="text-gray-500 md:text-right">
+                Simulación creada por 
+                <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
+                    AulaQuest
+                </a>
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        const canvas = document.getElementById('vectorCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvas-container');
+        const componentDisplay = document.getElementById('component-display');
+        
+        const showSumCheck = document.getElementById('show-sum');
+        const showValuesCheck = document.getElementById('show-values');
+        const showGridCheck = document.getElementById('show-grid');
+        const orientHBtn = document.getElementById('orient-h');
+        const orientVBtn = document.getElementById('orient-v');
+        const resetBtn = document.getElementById('reset-btn');
+        const sourceVectors = document.querySelectorAll('.source-vector');
+        const zoomInBtn = document.getElementById('zoom-in-btn');
+        const zoomOutBtn = document.getElementById('zoom-out-btn');
+
+        let scale = 40;
+        let origin = { x: 0, y: 0 };
+        let orientation = 'horizontal';
+        let vectorsOnCanvas = [];
+        let sumVector = { id: 's', value: 0, pos: { x: 0, y: 0 }, color: '#d946ef' };
+        let selectedVector = null;
+        let draggingState = { item: null, type: null, isNew: false };
+        let isPanning = false;
+        let panStart = { x: 0, y: 0 };
+
+        function init() {
+            canvas.width = canvasContainer.clientWidth;
+            canvas.height = canvasContainer.clientHeight;
+
+            // CAMBIO: Establecer zoom por defecto según la orientación
+            if (orientation === 'vertical') {
+                scale = 25; // Más alejado para ver de -8 a 8 aprox.
+            } else {
+                scale = 40; // Zoom por defecto para horizontal
+            }
+
+            origin = { x: canvas.width / 2, y: canvas.height / 2 };
+            vectorsOnCanvas = [];
+            selectedVector = null;
+            sumVector.pos = { x: origin.x, y: origin.y + (orientation === 'horizontal' ? 50 : 0) };
+            sourceVectors.forEach(el => el.classList.remove('disabled'));
+            draw();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#1a202c';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (showGridCheck.checked) drawGrid();
+            drawAxis();
+
+            let totalSum = 0;
+            vectorsOnCanvas.forEach(v => {
+                drawVector(v);
+                totalSum += v.value;
+            });
+            
+            sumVector.value = totalSum;
+
+            if (showSumCheck.checked && vectorsOnCanvas.length > 0) {
+                drawVector(sumVector, true);
+            }
+            updateComponentDisplay();
+        }
+        
+        function drawValueBox(text, x, y, color) {
+            ctx.font = 'bold 12px Inter';
+            const textMetrics = ctx.measureText(text);
+            const boxWidth = textMetrics.width + 16;
+            const boxHeight = 24;
+            const boxX = x - boxWidth / 2;
+            const boxY = y - boxHeight - 5;
+
+            ctx.fillStyle = '#fefce8';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.roundRect(boxX, boxY, boxWidth, boxHeight, [6]);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.fillStyle = '#1e293b';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, boxY + boxHeight / 2);
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = '#2d3748';
+            ctx.lineWidth = 0.5;
+            for (let x = origin.x % scale; x < canvas.width; x += scale) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = origin.y % scale; y < canvas.height; y += scale) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+        }
+
+        function drawAxis() {
+            ctx.strokeStyle = '#718096';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            if (orientation === 'horizontal') {
+                ctx.moveTo(0, origin.y); ctx.lineTo(canvas.width, origin.y);
+            } else {
+                ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, canvas.height);
+            }
+            ctx.stroke();
+            
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.arc(origin.x, origin.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.font = '10px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            if (orientation === 'horizontal') {
+                const maxTicks = Math.floor((canvas.width - origin.x) / scale);
+                const minTicks = Math.floor(origin.x / scale);
+                for (let i = 1; i <= maxTicks; i++) {
+                    const x = origin.x + i * scale;
+                    if (x < canvas.width - 15) ctx.fillText(i, x, origin.y + 15);
+                }
+                for (let i = -1; i >= -minTicks; i--) {
+                    const x = origin.x + i * scale;
+                    if (x > 15) ctx.fillText(i, x, origin.y + 15);
+                }
+            } else {
+                 const maxTicks = Math.floor(origin.y / scale);
+                 const minTicks = Math.floor((canvas.height - origin.y) / scale);
+                 for (let i = 1; i <= maxTicks; i++) {
+                    const y = origin.y - i * scale;
+                    if (y > 15) ctx.fillText(i, origin.x - 15, y);
+                }
+                 for (let i = -1; i >= -minTicks; i--) {
+                    const y = origin.y - i * scale;
+                    if (y < canvas.height - 15) ctx.fillText(i, origin.x - 15, y);
+                }
+            }
+        }
+
+        function drawVector(vec, isSum = false) {
+            const start = vec.pos;
+            const end = getVectorEnd(vec);
+
+            if (vec === selectedVector) {
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 8;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.stroke();
+                ctx.lineCap = 'butt';
+            }
+
+            ctx.strokeStyle = vec.color;
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.stroke();
+
+            if (!isSum) {
+                ctx.fillStyle = vec.color;
+                ctx.strokeStyle = '#1a202c';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(start.x, start.y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = vec.color;
+            const angle = orientation === 'horizontal' ? (vec.value >= 0 ? 0 : Math.PI) : (vec.value >= 0 ? -Math.PI / 2 : Math.PI / 2);
+            const headlen = 14;
+            ctx.beginPath();
+            ctx.moveTo(end.x, end.y);
+            ctx.lineTo(end.x - headlen * Math.cos(angle - Math.PI / 6), end.y - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(end.x - headlen * Math.cos(angle + Math.PI / 6), end.y - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+
+            if (showValuesCheck.checked) {
+                const text = isSum ? `|s| = ${Math.abs(vec.value).toFixed(1)}` : `|${vec.id}| = ${Math.abs(vec.value).toFixed(1)}`;
+                drawValueBox(text, (start.x + end.x) / 2, (start.y + end.y) / 2 - 10, vec.color);
+            }
+        }
+        
+        function updateComponentDisplay() {
+            if (selectedVector) {
+                const vec = selectedVector;
+                const mag = Math.abs(vec.value).toFixed(1);
+                const componentX = (orientation === 'horizontal' ? vec.value : 0).toFixed(1);
+                const componentY = (orientation === 'vertical' ? vec.value : 0).toFixed(1);
+                const vecId = vec.id;
+                
+                componentDisplay.innerHTML = `
+                    <span class="font-bold" style="color: ${vec.color};">|${vecId}|</span>
+                    <input type="text" readonly value="${mag}" class="w-12 text-center bg-gray-700 rounded border border-gray-600 text-white text-xs">
+                    <span class="font-bold text-gray-400">${vecId}<sub>x</sub></span>
+                    <input type="text" readonly value="${componentX}" class="w-12 text-center bg-gray-700 rounded border border-gray-600 text-white text-xs">
+                    <span class="font-bold text-gray-400">${vecId}<sub>y</sub></span>
+                    <input type="text" readonly value="${componentY}" class="w-12 text-center bg-gray-700 rounded border border-gray-600 text-white text-xs">
+                `;
+                componentDisplay.classList.remove('hidden');
+            } else {
+                componentDisplay.classList.add('hidden');
+            }
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+        
+        sourceVectors.forEach(el => {
+            el.addEventListener('mousedown', (e) => {
+                if (el.classList.contains('disabled')) return;
+                e.preventDefault();
+                
+                const id = el.dataset.id;
+                const baseValue = parseFloat(el.dataset.value);
+                
+                const newVector = {
+                    id: id,
+                    value: baseValue,
+                    color: el.dataset.color,
+                    pos: { x: origin.x - (baseValue * scale / 2), y: origin.y - 60 + (vectorsOnCanvas.length * 20) }
+                };
+                
+                vectorsOnCanvas.push(newVector);
+                selectedVector = newVector;
+                draggingState = { item: newVector, type: 'body', isNew: false };
+                el.classList.add('disabled');
+                
+                draw();
+            });
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            const pos = getMousePos(e);
+            let clickedOnItem = null;
+
+            const allDrawableVectors = [...vectorsOnCanvas];
+            if (showSumCheck.checked && vectorsOnCanvas.length > 0) allDrawableVectors.push(sumVector);
+
+            for (let i = allDrawableVectors.length - 1; i >= 0; i--) {
+                if (isClickOnVector(pos, allDrawableVectors[i])) {
+                    clickedOnItem = allDrawableVectors[i];
+                    break;
+                }
+            }
+
+            selectedVector = clickedOnItem;
+            
+            if (selectedVector) {
+                if (selectedVector.id === 's') {
+                    draggingState = { item: selectedVector, type: 'body' };
+                } else {
+                    const end = getVectorEnd(selectedVector);
+                    const headDist = Math.hypot(pos.x - end.x, pos.y - end.y);
+                    draggingState = { item: selectedVector, type: headDist < 15 ? 'head' : 'body' };
+                }
+            } else {
+                isPanning = true;
+                panStart = pos;
+                canvasContainer.classList.add('grabbing');
+            }
+            
+            draw();
+        });
+
+        function isClickOnVector(pos, vec) {
+            const start = vec.pos;
+            const end = getVectorEnd(vec);
+            const buffer = 8;
+            const bodyRect = {
+                x: Math.min(start.x, end.x) - buffer, y: Math.min(start.y, end.y) - buffer,
+                w: Math.abs(start.x - end.x) + 2 * buffer, h: Math.abs(start.y - end.y) + 2 * buffer
+            };
+            return pos.x > bodyRect.x && pos.x < bodyRect.x + bodyRect.w && pos.y > bodyRect.y && pos.y < bodyRect.y + bodyRect.h;
+        }
+
+        function getVectorEnd(vec) {
+            const end = { ...vec.pos };
+            if (orientation === 'horizontal') end.x += vec.value * scale;
+            else end.y -= vec.value * scale;
+            return end;
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            const pos = getMousePos(e);
+            let cursorSet = false;
+            
+            if (isPanning) {
+                const dx = pos.x - panStart.x;
+                const dy = pos.y - panStart.y;
+                origin.x += dx;
+                origin.y += dy;
+                vectorsOnCanvas.forEach(v => { v.pos.x += dx; v.pos.y += dy; });
+                sumVector.pos.x += dx;
+                sumVector.pos.y += dy;
+                panStart = pos;
+                draw();
+                return;
+            }
+
+            if (!draggingState.item) {
+                 const allDrawableVectors = [...vectorsOnCanvas];
+                if (showSumCheck.checked && vectorsOnCanvas.length > 0) allDrawableVectors.push(sumVector);
+
+                for (const v of allDrawableVectors) {
+                    const end = getVectorEnd(v);
+                    const headDist = Math.hypot(pos.x - end.x, pos.y - end.y);
+                    if (v.id !== 's' && headDist < 15) {
+                        canvasContainer.style.cursor = orientation === 'horizontal' ? 'ew-resize' : 'ns-resize';
+                        cursorSet = true;
+                        break;
+                    } else if (isClickOnVector(pos, v)) {
+                        canvasContainer.style.cursor = 'move';
+                        cursorSet = true;
+                        break;
+                    }
+                }
+                if (!cursorSet) canvasContainer.style.cursor = 'grab';
+            }
+
+            if (draggingState.item) {
+                if (draggingState.type === 'head') {
+                    if (orientation === 'horizontal') {
+                        draggingState.item.value = (pos.x - draggingState.item.pos.x) / scale;
+                    } else {
+                        draggingState.item.value = (draggingState.item.pos.y - pos.y) / scale;
+                    }
+                } else if (draggingState.type === 'body') {
+                    draggingState.item.pos = pos;
+                }
+                draw();
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            draggingState = { item: null, type: null, isNew: false };
+            isPanning = false;
+            canvasContainer.classList.remove('grabbing');
+            draw();
+        });
+
+        [showSumCheck, showValuesCheck, showGridCheck].forEach(el => el.addEventListener('change', draw));
+        
+        resetBtn.addEventListener('click', init);
+
+        const switchOrientation = (newOrientation) => {
+            orientation = newOrientation;
+            const isHorizontal = orientation === 'horizontal';
+            orientHBtn.classList.toggle('opacity-50', isHorizontal);
+            orientHBtn.disabled = isHorizontal;
+            orientVBtn.classList.toggle('opacity-50', !isHorizontal);
+            orientVBtn.disabled = !isHorizontal;
+            orientHBtn.classList.toggle('bg-cyan-600', isHorizontal);
+            orientVBtn.classList.toggle('bg-gray-600', isHorizontal);
+            orientVBtn.classList.toggle('bg-cyan-600', !isHorizontal);
+            orientHBtn.classList.toggle('bg-gray-600', !isHorizontal);
+            init();
+        };
+        orientHBtn.addEventListener('click', () => switchOrientation('horizontal'));
+        orientVBtn.addEventListener('click', () => switchOrientation('vertical'));
+        
+        zoomInBtn.addEventListener('click', () => { scale *= 1.2; draw(); });
+        zoomOutBtn.addEventListener('click', () => { scale /= 1.2; draw(); });
+
+        window.addEventListener('resize', init);
+        init();
+    </script>
+</body>
+</html>
