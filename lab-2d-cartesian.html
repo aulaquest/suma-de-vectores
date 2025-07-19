@@ -49,10 +49,9 @@
             </div>
         </div>
 
-        <!-- Panel de Control: en móvil ocupa el 40% de la altura, en escritorio el 25% del ancho. Es un flex-col para posicionar el contenido y el footer. -->
-        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex flex-col w-full h-[40%] md:h-full md:w-[25%]">
-            <!-- Área de contenido principal del panel. Crece para ocupar el espacio disponible y tiene su propio scroll. -->
-            <div class="flex-grow space-y-6 overflow-y-auto p-4">
+        <!-- Panel de Control: AHORA SÍ tiene scroll propio en móvil y el footer no está fijo en PC -->
+        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-[40%] md:h-full md:w-[25%] p-4 overflow-y-auto">
+            <div class="space-y-6">
                 <div>
                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTA</h3>
                     <div class="space-y-2">
@@ -98,8 +97,8 @@
                 </div>
                  <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
             </div>
-            <!-- Footer del panel. No se encoge y se mantiene en la parte inferior. -->
-            <div class="text-center p-4 pt-0 flex-shrink-0">
+            <!-- Footer del panel. Ahora está dentro del flujo normal y se desplazará con el contenido. -->
+            <div class="text-center mt-6">
                  <a href="./index.html" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors w-full inline-block">
                      &larr; Volver al Menú Principal
                  </a>
@@ -133,7 +132,8 @@
         const zoomInBtn = document.getElementById('zoom-in-btn');
         const zoomOutBtn = document.getElementById('zoom-out-btn');
 
-        let scale = 30;
+        // CAMBIO: Aumentado el zoom inicial
+        let scale = 45;
         let origin = { x: 0, y: 0 };
         let vectorsOnCanvas = [];
         let sumVector = { id: 's', value: {x: 0, y: 0}, pos: { x: 0, y: 0 }, color: '#d946ef' };
