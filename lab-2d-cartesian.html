@@ -726,25 +726,10 @@
             }
             snapPoint = null;
 
-            // --- CORRECCIÓN PARA MÓVIL ---
-            // Se comprueba si la vista es de escritorio (ancho >= 768px, el breakpoint 'md' de Tailwind).
-            // La funcionalidad de eliminar un vector arrastrándolo al panel solo se activará en escritorio.
-            const isDesktopView = window.innerWidth >= 768;
-
-            if (isDesktopView && draggingState.item && draggingState.item.id !== 's' && !draggingState.isNew) {
-                const panelRect = controlPanel.getBoundingClientRect();
-                const finalX = (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientX : e.clientX;
-                
-                // En la vista de escritorio, el panel está a la derecha.
-                if (finalX >= panelRect.left) {
-                    vectorsOnCanvas = vectorsOnCanvas.filter(v => v !== draggingState.item);
-                    document.querySelector(`.source-vector[data-id="${draggingState.item.id}"]`).classList.remove('disabled');
-                    if (selectedVector === draggingState.item) {
-                        selectedVector = null;
-                    }
-                }
-            }
-            // En la vista móvil, esta lógica de eliminación se omite, evitando que los vectores desaparezcan accidentalmente.
+            // --- LÓGICA DE ELIMINACIÓN DE VECTOR ELIMINADA ---
+            // Se ha quitado el bloque de código que comprobaba si el vector se soltaba
+            // sobre el panel de control. Esto simplifica el código y previene errores
+            // en dispositivos móviles. Para limpiar el canvas, se debe usar el botón "Reiniciar".
             
             draggingState = { item: null, type: null, isNew: false };
             isPanning = false;
