@@ -9,7 +9,11 @@
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            overflow: hidden;
+            /* Se elimina overflow: hidden para permitir el scroll del panel en móvil */
+        }
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Previene el scroll en el body, el scroll se manejará en los paneles */
         }
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
@@ -31,11 +35,13 @@
 </head>
 <body class="bg-gray-900 text-gray-200 flex h-screen">
 
+    <!-- Contenedor principal que ocupa toda la pantalla -->
     <div class="w-full h-full flex flex-col md:flex-row">
         
-        <div id="canvas-container" class="relative w-full h-[60vh] md:h-full md:w-[75%]">
+        <!-- Contenedor del Canvas: en móvil ocupa el 60% de la altura, en escritorio el 75% del ancho -->
+        <div id="canvas-container" class="relative w-full h-[60%] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
-            <div id="component-display" class="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex items-center space-x-2 text-xs backdrop-blur-sm border border-gray-700">
+            <div id="component-display" class="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap justify-center items-center gap-x-2 gap-y-1 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
             </div>
             <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
@@ -44,7 +50,8 @@
             </div>
         </div>
 
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex flex-col w-full h-[40vh] md:h-full md:w-[25%] overflow-y-auto">
+        <!-- Panel de Control: en móvil ocupa el 40% de la altura con scroll, en escritorio el 25% del ancho -->
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex flex-col w-full h-[40%] md:h-full md:w-[25%] overflow-y-auto">
             <div class="flex-grow space-y-6">
                 <div>
                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTA</h3>
@@ -91,10 +98,10 @@
                 </div>
                  <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
             </div>
-            <div class="text-center mt-auto pt-4">
+            <div class="text-center mt-auto pt-4 flex-shrink-0">
                  <a href="./index.html" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors w-full inline-block">
-                    &larr; Volver al Menú Principal
-                </a>
+                     &larr; Volver al Menú Principal
+                 </a>
                 <p class="text-xs text-gray-500 mt-4">
                     Simulación creada por 
                     <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
@@ -134,8 +141,7 @@
         let isPanning = false;
         let panStart = { x: 0, y: 0 };
         let snapPoint = null;
-        const isTouchDevice = 'ontouchstart' in window;
-
+        
         function worldToCanvas(worldPos) {
             return { x: origin.x + worldPos.x * scale, y: origin.y - worldPos.y * scale };
         }
@@ -446,7 +452,7 @@
             const vec1 = vectorsOnCanvas[0];
             const vec2 = vectorsOnCanvas[1];
 
-            if(vec1.pos.x !== vec2.pos.x || vec1.pos.y !== vec2.pos.y) return;
+            if(!vec1 || !vec2 || vec1.pos.x !== vec2.pos.x || vec1.pos.y !== vec2.pos.y) return;
 
             const start = worldToCanvas(vec1.pos);
             const end1 = getVectorEndCanvas(vec1);
@@ -556,8 +562,10 @@
         }
         
         sourceVectors.forEach(el => {
-            el.addEventListener('mousedown', (e) => {
+            // Usamos 'pointerdown' para unificar ratón y táctil
+            el.addEventListener('pointerdown', (e) => {
                 if (el.classList.contains('disabled')) return;
+                // Prevenimos que el arrastre del SVG inicie un drag & drop del navegador
                 e.preventDefault();
                 
                 const newVector = {
@@ -712,10 +720,17 @@
             }
             snapPoint = null;
 
-            if (draggingState.item && draggingState.item.id !== 's' && !draggingState.isNew) {
+            // --- CORRECCIÓN PARA MÓVIL ---
+            // Se comprueba si la vista es de escritorio (ancho >= 768px, el breakpoint 'md' de Tailwind).
+            // La funcionalidad de eliminar un vector arrastrándolo al panel solo se activará en escritorio.
+            const isDesktopView = window.innerWidth >= 768;
+
+            if (isDesktopView && draggingState.item && draggingState.item.id !== 's' && !draggingState.isNew) {
                 const panelRect = controlPanel.getBoundingClientRect();
                 const finalX = (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientX : e.clientX;
-                if (finalX >= panelRect.left && !isTouchDevice) {
+                
+                // En la vista de escritorio, el panel está a la derecha.
+                if (finalX >= panelRect.left) {
                     vectorsOnCanvas = vectorsOnCanvas.filter(v => v !== draggingState.item);
                     document.querySelector(`.source-vector[data-id="${draggingState.item.id}"]`).classList.remove('disabled');
                     if (selectedVector === draggingState.item) {
@@ -723,6 +738,7 @@
                     }
                 }
             }
+            // En la vista móvil, esta lógica de eliminación se omite, evitando que los vectores desaparezcan accidentalmente.
             
             draggingState = { item: null, type: null, isNew: false };
             isPanning = false;
