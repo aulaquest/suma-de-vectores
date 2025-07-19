@@ -38,8 +38,8 @@
     <!-- Contenedor principal que se adapta a la pantalla -->
     <div class="w-full h-full flex flex-col md:flex-row">
         
-        <!-- Contenedor del Canvas: en móvil ocupa 60vh, en escritorio el 75% del ancho -->
-        <div id="canvas-container" class="relative w-full h-[60vh] md:h-full md:w-[75%]">
+        <!-- Contenedor del Canvas: en móvil ocupa 60% de la altura, en escritorio el 75% del ancho -->
+        <div id="canvas-container" class="relative w-full h-[60%] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap justify-center items-center gap-x-2 gap-y-1 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -50,8 +50,8 @@
             </div>
         </div>
 
-        <!-- Panel de Control: en móvil ocupa 40vh con scroll independiente. En escritorio, ocupa el 25% del ancho -->
-        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-[40vh] md:h-full md:w-[25%] p-4 overflow-y-auto">
+        <!-- Panel de Control: en móvil ocupa 40% de la altura con scroll independiente. En escritorio, ocupa el 25% del ancho -->
+        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-[40%] md:h-full md:w-[25%] p-4 overflow-y-auto">
             
             <div class="space-y-6">
                 <div>
