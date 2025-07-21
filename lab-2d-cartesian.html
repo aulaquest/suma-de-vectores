@@ -12,13 +12,10 @@
         }
         html, body {
             height: 100vh;
-            width: 100vw;
             overflow: hidden; 
         }
         
-        /* --- ESTILOS BASE (SIN LAYOUT) --- */
         #canvas-container { 
-            position: relative; 
             cursor: grab;
         }
         #canvas-container.grabbing { cursor: grabbing; }
@@ -39,13 +36,11 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200">
+<body class="bg-gray-900 text-gray-200 h-screen">
 
-    <!-- Contenedor principal. El layout ahora es 100% controlado por JavaScript -->
-    <div id="main-layout">
+    <div class="w-full h-full flex flex-col md:flex-row">
         
-        <!-- Contenedor del Canvas -->
-        <div id="canvas-container">
+        <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap justify-center items-center gap-x-2 gap-y-1 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -56,12 +51,11 @@
             </div>
         </div>
 
-        <!-- Panel de Control -->
-        <div id="control-panel" class="bg-gray-800 p-4">
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none">
             
             <div class="space-y-6">
                 <div>
-                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTA</h3>
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTAS</h3>
                     <div class="space-y-2">
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
@@ -123,11 +117,9 @@
     <script>
         const canvas = document.getElementById('vectorCanvas');
         const ctx = canvas.getContext('2d');
-        const mainLayout = document.getElementById('main-layout');
         const canvasContainer = document.getElementById('canvas-container');
-        const controlPanel = document.getElementById('control-panel');
-        // --- CORRECCIÓN: Se añade la declaración de la variable que faltaba ---
         const componentDisplay = document.getElementById('component-display');
+        const controlPanel = document.getElementById('control-panel');
         
         const showSumCheck = document.getElementById('show-sum');
         const showValuesCheck = document.getElementById('show-values');
@@ -152,76 +144,20 @@
         let panStart = { x: 0, y: 0 };
         let snapPoint = null;
         
-        // --- LÓGICA DE LAYOUT CON JAVASCRIPT ---
-        function applyLayout() {
-            const isMobile = window.innerWidth < 768;
-            
-            if (isMobile) {
-                // Layout para móvil con posicionamiento absoluto y alturas explícitas
-                const totalHeight = window.innerHeight;
-                mainLayout.style.display = 'block';
-                mainLayout.style.position = 'relative';
-
-                canvasContainer.style.position = 'absolute';
-                canvasContainer.style.top = '0';
-                canvasContainer.style.left = '0';
-                canvasContainer.style.width = '100%';
-                canvasContainer.style.height = `${totalHeight * 0.6}px`;
-
-                controlPanel.style.position = 'absolute';
-                controlPanel.style.top = `${totalHeight * 0.6}px`;
-                controlPanel.style.left = '0';
-                controlPanel.style.width = '100%';
-                controlPanel.style.height = `${totalHeight * 0.4}px`;
-                controlPanel.style.overflowY = 'auto';
-                controlPanel.style.borderLeft = 'none';
-                controlPanel.style.borderTop = '2px solid #0e7490';
-            } else {
-                // Layout para escritorio, reseteando estilos y usando flex
-                mainLayout.style.display = 'flex';
-                mainLayout.style.position = 'static';
-
-                canvasContainer.style.position = 'relative';
-                canvasContainer.style.width = '75%';
-                canvasContainer.style.height = '100%';
-
-                controlPanel.style.position = 'static';
-                controlPanel.style.width = '25%';
-                controlPanel.style.height = '100%';
-                controlPanel.style.overflowY = 'auto';
-                controlPanel.style.borderTop = 'none';
-                controlPanel.style.borderLeft = '2px solid #0e7490';
-            }
-
-            // Después de ajustar el layout, redibujamos el canvas con su nuevo tamaño
-            initCanvas();
-        }
-
-        function initCanvas() {
+        function init() {
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
             origin = { x: 50, y: canvas.height - 50 };
-            draw();
-        }
-
-        function resetSimulation() {
             vectorsOnCanvas = [];
             selectedVector = null;
             sumVector.pos = { x: 0, y: 0 }; 
             sourceVectors.forEach(el => el.classList.remove('disabled'));
-            // No es necesario llamar a initCanvas() aquí, porque draw() ya lo hace
             draw();
-        }
-        
-        // --- Lógica de la simulación (sin cambios) ---
-        function worldToCanvas(worldPos) {
-            return { x: origin.x + worldPos.x * scale, y: origin.y - worldPos.y * scale };
-        }
-        function canvasToWorld(canvasPos) {
-            return { x: (canvasPos.x - origin.x) / scale, y: (origin.y - canvasPos.y) / scale };
         }
 
         function draw() {
+            if (canvas.width <= 0 || canvas.height <= 0) return;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#1a202c';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -256,6 +192,13 @@
             updateComponentDisplay();
         }
         
+        function worldToCanvas(worldPos) {
+            return { x: origin.x + worldPos.x * scale, y: origin.y - worldPos.y * scale };
+        }
+        function canvasToWorld(canvasPos) {
+            return { x: (canvasPos.x - origin.x) / scale, y: (origin.y - canvasPos.y) / scale };
+        }
+
         function drawValueBox(text, x, y, color, isTransparent = false) {
             ctx.font = 'bold 12px Inter';
             const textMetrics = ctx.measureText(text);
@@ -778,13 +721,21 @@
             });
         });
         
-        resetBtn.addEventListener('click', resetSimulation);
+        resetBtn.addEventListener('click', init);
         zoomInBtn.addEventListener('click', () => { scale *= 1.2; draw(); });
         zoomOutBtn.addEventListener('click', () => { scale /= 1.2; draw(); });
 
-        // --- INICIALIZACIÓN ---
-        window.addEventListener('resize', applyLayout);
-        window.addEventListener('load', applyLayout);
+        // --- CORRECCIÓN: Event listeners de interacción restaurados ---
+        canvas.addEventListener('mousedown', handleMouseDown);
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+        
+        canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
+        window.addEventListener('touchmove', handleMouseMove, { passive: false });
+        window.addEventListener('touchend', handleMouseUp);
+
+        window.addEventListener('resize', init);
+        window.addEventListener('load', init);
 
     </script>
 </body>
