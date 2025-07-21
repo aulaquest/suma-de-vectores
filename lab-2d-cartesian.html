@@ -12,7 +12,7 @@
         }
         /* Previene el scroll en toda la página, forzando a que el scroll ocurra solo en los paneles designados */
         html, body {
-            height: 100%;
+            height: 100vh; /* Usar vh para asegurar que ocupe toda la altura de la ventana gráfica */
             overflow: hidden; 
         }
         #canvas-container { cursor: grab; }
@@ -35,11 +35,11 @@
 </head>
 <body class="bg-gray-900 text-gray-200 h-screen">
 
-    <!-- Contenedor principal con layout de escritorio fijo -->
-    <div class="w-full h-full flex flex-row">
+    <!-- Contenedor principal: por defecto es columna (móvil) y pasa a fila en pantallas medianas (md) y superiores -->
+    <div class="w-full h-full flex flex-col md:flex-row">
         
-        <!-- Contenedor del Canvas: ocupa el 75% del ancho -->
-        <div id="canvas-container" class="relative w-[75%] h-full">
+        <!-- Contenedor del Canvas: 60% de altura en móvil, 75% de ancho en escritorio -->
+        <div id="canvas-container" class="relative w-full h-[60%] md:w-[75%] md:h-full">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap justify-center items-center gap-x-2 gap-y-1 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -50,8 +50,8 @@
             </div>
         </div>
 
-        <!-- Panel de Control: ocupa el 25% del ancho con scroll -->
-        <div id="control-panel" class="bg-gray-800 border-l-2 border-cyan-800 w-[25%] h-full p-4 overflow-y-auto">
+        <!-- Panel de Control: 40% de altura en móvil, 25% de ancho en escritorio. Con scroll y min-h-0 para que funcione en flex-col -->
+        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-[40%] md:w-[25%] md:h-full p-4 overflow-y-auto min-h-0">
             
             <div class="space-y-6">
                 <div>
