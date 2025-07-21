@@ -12,24 +12,52 @@
         }
         html, body {
             height: 100vh;
+            width: 100vw;
             overflow: hidden; 
         }
 
-        /* --- CAMBIO CLAVE: Usando CSS Grid para el Layout Principal --- */
+        /* --- ESTRATEGIA DE LAYOUT A PRUEBA DE ERRORES --- */
+        
+        /* Por defecto (Escritorio): Usamos Flexbox, que aquí funciona bien. */
         #main-layout {
-            display: grid;
+            display: flex;
             width: 100%;
             height: 100%;
-            /* Por defecto (móvil): 2 filas. Canvas 60%, Panel el resto. */
-            grid-template-rows: 60% 1fr;
-            grid-template-columns: 100%;
+        }
+        #canvas-container {
+            width: 75%;
+            height: 100%;
+            position: relative;
+        }
+        #control-panel {
+            width: 25%;
+            height: 100%;
+            overflow-y: auto;
+            border-left: 2px solid #0e7490; /* border-cyan-800 */
         }
 
-        /* A partir del breakpoint 'md' (escritorio), cambiamos a 2 columnas */
-        @media (min-width: 768px) {
+        /* Móvil (pantallas de menos de 768px de ancho) */
+        @media (max-width: 767px) {
             #main-layout {
-                grid-template-rows: 100%;
-                grid-template-columns: 75% 1fr;
+                display: block; /* Anulamos flexbox */
+                position: relative;
+            }
+            #canvas-container {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 60vh; /* Altura explícita del 60% de la pantalla */
+            }
+            #control-panel {
+                position: absolute;
+                top: 60vh; /* Comienza justo donde acaba el canvas */
+                left: 0;
+                width: 100%;
+                height: 40vh; /* Altura explícita del 40% restante */
+                overflow-y: auto; /* El scroll funcionará porque la altura es fija */
+                border-left: none;
+                border-top: 2px solid #0e7490;
             }
         }
         
@@ -51,13 +79,13 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 h-screen">
+<body class="bg-gray-900 text-gray-200">
 
-    <!-- Contenedor principal ahora controlado por CSS Grid -->
+    <!-- Contenedor principal ahora controlado por el CSS de arriba -->
     <div id="main-layout">
         
-        <!-- Contenedor del Canvas: las clases de tamaño ya no son necesarias, Grid las controla -->
-        <div id="canvas-container" class="relative w-full h-full">
+        <!-- Contenedor del Canvas -->
+        <div id="canvas-container">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap justify-center items-center gap-x-2 gap-y-1 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -68,8 +96,8 @@
             </div>
         </div>
 
-        <!-- Panel de Control: `min-h-0` es crucial para que el scroll funcione dentro de la celda de la rejilla -->
-        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-full p-4 overflow-y-auto min-h-0">
+        <!-- Panel de Control -->
+        <div id="control-panel" class="bg-gray-800 p-4">
             
             <div class="space-y-6">
                 <div>
