@@ -10,11 +10,29 @@
         body { 
             font-family: 'Inter', sans-serif; 
         }
-        /* Previene el scroll en toda la página, forzando a que el scroll ocurra solo en los paneles designados */
         html, body {
-            height: 100vh; /* Usar vh para asegurar que ocupe toda la altura de la ventana gráfica */
+            height: 100vh;
             overflow: hidden; 
         }
+
+        /* --- CAMBIO CLAVE: Usando CSS Grid para el Layout Principal --- */
+        #main-layout {
+            display: grid;
+            width: 100%;
+            height: 100%;
+            /* Por defecto (móvil): 2 filas. Canvas 60%, Panel el resto. */
+            grid-template-rows: 60% 1fr;
+            grid-template-columns: 100%;
+        }
+
+        /* A partir del breakpoint 'md' (escritorio), cambiamos a 2 columnas */
+        @media (min-width: 768px) {
+            #main-layout {
+                grid-template-rows: 100%;
+                grid-template-columns: 75% 1fr;
+            }
+        }
+        
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
         .source-vector.disabled { opacity: 0.4; cursor: not-allowed; }
@@ -35,11 +53,11 @@
 </head>
 <body class="bg-gray-900 text-gray-200 h-screen">
 
-    <!-- Contenedor principal: por defecto es columna (móvil) y pasa a fila en pantallas medianas (md) y superiores -->
-    <div class="w-full h-full flex flex-col md:flex-row">
+    <!-- Contenedor principal ahora controlado por CSS Grid -->
+    <div id="main-layout">
         
-        <!-- Contenedor del Canvas: 60% de altura en móvil, 75% de ancho en escritorio -->
-        <div id="canvas-container" class="relative w-full h-[60%] md:w-[75%] md:h-full">
+        <!-- Contenedor del Canvas: las clases de tamaño ya no son necesarias, Grid las controla -->
+        <div id="canvas-container" class="relative w-full h-full">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap justify-center items-center gap-x-2 gap-y-1 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -50,12 +68,8 @@
             </div>
         </div>
 
-        <!-- 
-          Panel de Control:
-          - Móvil: `flex-1` hace que ocupe el espacio restante (el 40%). `min-h-0` es CRUCIAL para que `overflow-y-auto` funcione en un contenedor flex vertical.
-          - Escritorio: `md:flex-none` anula el `flex-1`. `md:w-[25%]` y `md:h-full` establecen las dimensiones para la vista de escritorio.
-        -->
-        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full p-4 overflow-y-auto min-h-0 flex-1 md:flex-none md:w-[25%] md:h-full">
+        <!-- Panel de Control: `min-h-0` es crucial para que el scroll funcione dentro de la celda de la rejilla -->
+        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-full p-4 overflow-y-auto min-h-0">
             
             <div class="space-y-6">
                 <div>
@@ -120,8 +134,7 @@
     </div>
 
     <script>
-        // El código JavaScript permanece sin cambios ya que la lógica de la simulación
-        // no necesita ser modificada para este ajuste de layout.
+        // El código JavaScript no necesita ningún cambio.
         const canvas = document.getElementById('vectorCanvas');
         const ctx = canvas.getContext('2d');
         const canvasContainer = document.getElementById('canvas-container');
