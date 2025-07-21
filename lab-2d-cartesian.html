@@ -15,54 +15,14 @@
             width: 100vw;
             overflow: hidden; 
         }
-
-        /* --- ESTRATEGIA DE LAYOUT A PRUEBA DE ERRORES --- */
         
-        /* Por defecto (Escritorio): Usamos Flexbox, que aquí funciona bien. */
-        #main-layout {
-            display: flex;
-            width: 100%;
-            height: 100%;
+        /* --- ESTILOS BASE (SIN LAYOUT) --- */
+        #canvas-container { 
+            position: relative; 
+            cursor: grab;
         }
-        #canvas-container {
-            width: 75%;
-            height: 100%;
-            position: relative;
-        }
-        #control-panel {
-            width: 25%;
-            height: 100%;
-            overflow-y: auto;
-            border-left: 2px solid #0e7490; /* border-cyan-800 */
-        }
-
-        /* Móvil (pantallas de menos de 768px de ancho) */
-        @media (max-width: 767px) {
-            #main-layout {
-                display: block; /* Anulamos flexbox */
-                position: relative;
-            }
-            #canvas-container {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 60vh; /* Altura explícita del 60% de la pantalla */
-            }
-            #control-panel {
-                position: absolute;
-                top: 60vh; /* Comienza justo donde acaba el canvas */
-                left: 0;
-                width: 100%;
-                height: 40vh; /* Altura explícita del 40% restante */
-                overflow-y: auto; /* El scroll funcionará porque la altura es fija */
-                border-left: none;
-                border-top: 2px solid #0e7490;
-            }
-        }
-        
-        #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
+
         .source-vector.disabled { opacity: 0.4; cursor: not-allowed; }
         .form-checkbox {
             -webkit-appearance: none; appearance: none;
@@ -81,7 +41,7 @@
 </head>
 <body class="bg-gray-900 text-gray-200">
 
-    <!-- Contenedor principal ahora controlado por el CSS de arriba -->
+    <!-- Contenedor principal. El layout ahora es 100% controlado por JavaScript -->
     <div id="main-layout">
         
         <!-- Contenedor del Canvas -->
@@ -146,7 +106,6 @@
                  <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
             </div>
             
-            <!-- Footer del panel: ahora está dentro del flujo de scroll normal -->
             <div class="text-center mt-6">
                  <a href="./index.html" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors w-full inline-block">
                       &larr; Volver al Menú Principal
@@ -162,12 +121,13 @@
     </div>
 
     <script>
-        // El código JavaScript no necesita ningún cambio.
         const canvas = document.getElementById('vectorCanvas');
         const ctx = canvas.getContext('2d');
+        const mainLayout = document.getElementById('main-layout');
         const canvasContainer = document.getElementById('canvas-container');
-        const componentDisplay = document.getElementById('component-display');
         const controlPanel = document.getElementById('control-panel');
+        // --- CORRECCIÓN: Se añade la declaración de la variable que faltaba ---
+        const componentDisplay = document.getElementById('component-display');
         
         const showSumCheck = document.getElementById('show-sum');
         const showValuesCheck = document.getElementById('show-values');
@@ -192,22 +152,73 @@
         let panStart = { x: 0, y: 0 };
         let snapPoint = null;
         
+        // --- LÓGICA DE LAYOUT CON JAVASCRIPT ---
+        function applyLayout() {
+            const isMobile = window.innerWidth < 768;
+            
+            if (isMobile) {
+                // Layout para móvil con posicionamiento absoluto y alturas explícitas
+                const totalHeight = window.innerHeight;
+                mainLayout.style.display = 'block';
+                mainLayout.style.position = 'relative';
+
+                canvasContainer.style.position = 'absolute';
+                canvasContainer.style.top = '0';
+                canvasContainer.style.left = '0';
+                canvasContainer.style.width = '100%';
+                canvasContainer.style.height = `${totalHeight * 0.6}px`;
+
+                controlPanel.style.position = 'absolute';
+                controlPanel.style.top = `${totalHeight * 0.6}px`;
+                controlPanel.style.left = '0';
+                controlPanel.style.width = '100%';
+                controlPanel.style.height = `${totalHeight * 0.4}px`;
+                controlPanel.style.overflowY = 'auto';
+                controlPanel.style.borderLeft = 'none';
+                controlPanel.style.borderTop = '2px solid #0e7490';
+            } else {
+                // Layout para escritorio, reseteando estilos y usando flex
+                mainLayout.style.display = 'flex';
+                mainLayout.style.position = 'static';
+
+                canvasContainer.style.position = 'relative';
+                canvasContainer.style.width = '75%';
+                canvasContainer.style.height = '100%';
+
+                controlPanel.style.position = 'static';
+                controlPanel.style.width = '25%';
+                controlPanel.style.height = '100%';
+                controlPanel.style.overflowY = 'auto';
+                controlPanel.style.borderTop = 'none';
+                controlPanel.style.borderLeft = '2px solid #0e7490';
+            }
+
+            // Después de ajustar el layout, redibujamos el canvas con su nuevo tamaño
+            initCanvas();
+        }
+
+        function initCanvas() {
+            canvas.width = canvasContainer.clientWidth;
+            canvas.height = canvasContainer.clientHeight;
+            origin = { x: 50, y: canvas.height - 50 };
+            draw();
+        }
+
+        function resetSimulation() {
+            vectorsOnCanvas = [];
+            selectedVector = null;
+            sumVector.pos = { x: 0, y: 0 }; 
+            sourceVectors.forEach(el => el.classList.remove('disabled'));
+            // No es necesario llamar a initCanvas() aquí, porque draw() ya lo hace
+            draw();
+        }
+        
+        // --- Lógica de la simulación (sin cambios) ---
         function worldToCanvas(worldPos) {
             return { x: origin.x + worldPos.x * scale, y: origin.y - worldPos.y * scale };
         }
         function canvasToWorld(canvasPos) {
             return { x: (canvasPos.x - origin.x) / scale, y: (origin.y - canvasPos.y) / scale };
-        }
-
-        function init() {
-            canvas.width = canvasContainer.clientWidth;
-            canvas.height = canvasContainer.clientHeight;
-            origin = { x: 50, y: canvas.height - 50 };
-            vectorsOnCanvas = [];
-            selectedVector = null;
-            sumVector.pos = { x: 0, y: 0 }; 
-            sourceVectors.forEach(el => el.classList.remove('disabled'));
-            draw();
         }
 
         function draw() {
@@ -612,24 +623,19 @@
         }
         
         sourceVectors.forEach(el => {
-            // Usamos 'pointerdown' para unificar ratón y táctil
             el.addEventListener('pointerdown', (e) => {
                 if (el.classList.contains('disabled')) return;
-                // Prevenimos que el arrastre del SVG inicie un drag & drop del navegador
                 e.preventDefault();
-                
                 const newVector = {
                     id: el.dataset.id,
                     value: { x: parseFloat(el.dataset.vx), y: parseFloat(el.dataset.vy) },
                     color: el.dataset.color,
                     pos: canvasToWorld({ x: canvas.width / 2, y: canvas.height / 2 })
                 };
-                
                 vectorsOnCanvas.push(newVector);
                 selectedVector = newVector;
                 draggingState = { item: newVector, type: 'body', isNew: true };
                 el.classList.add('disabled');
-                
                 draw();
             });
         });
@@ -638,19 +644,15 @@
             if (e.type === 'touchstart') e.preventDefault();
             const pos = getMousePos(e);
             let clickedOnItem = null;
-
             const allDrawableVectors = [...vectorsOnCanvas];
             if (showSumCheck.checked && vectorsOnCanvas.length > 0) allDrawableVectors.push(sumVector);
-
             for (let i = allDrawableVectors.length - 1; i >= 0; i--) {
                 if (isClickOnVector(pos, allDrawableVectors[i])) {
                     clickedOnItem = allDrawableVectors[i];
                     break;
                 }
             }
-
             selectedVector = clickedOnItem;
-            
             if (selectedVector) {
                 draggingState.isNew = false;
                 if (selectedVector.id === 's') {
@@ -666,7 +668,6 @@
                 panStart = pos;
                 canvasContainer.classList.add('grabbing');
             }
-            
             draw();
         }
 
@@ -676,36 +677,30 @@
             const dx = end.x - start.x;
             const dy = end.y - start.y;
             if (dx === 0 && dy === 0) return Math.hypot(pos.x - start.x, pos.y - start.y) < 10;
-            
             const t = ((pos.x - start.x) * dx + (pos.y - start.y) * dy) / (dx * dx + dy * dy);
             const clampedT = Math.max(0, Math.min(1, t));
             const closestX = start.x + clampedT * dx;
             const closestY = start.y + clampedT * dy;
             const dist = Math.hypot(pos.x - closestX, pos.y - closestY);
-
             return dist < 10;
         }
 
         function getVectorEnd_World(vec) {
-            return {
-                x: vec.pos.x + vec.value.x,
-                y: vec.pos.y + vec.value.y
-            };
+            return { x: vec.pos.x + vec.value.x, y: vec.pos.y + vec.value.y };
         }
         function getVectorEndCanvas(vec) {
             return worldToCanvas(getVectorEnd_World(vec));
         }
 
         function checkForSnap(draggedVec) {
-            const snapThreshold = 15 / scale; // Threshold in world units
-            const potentialSnapPoints = [{x:0, y:0}]; // Origin
+            const snapThreshold = 15 / scale;
+            const potentialSnapPoints = [{x:0, y:0}];
             vectorsOnCanvas.forEach(v => {
                 if (v !== draggedVec) {
-                    potentialSnapPoints.push(v.pos); // Cola
-                    potentialSnapPoints.push(getVectorEnd_World(v)); // Punta
+                    potentialSnapPoints.push(v.pos);
+                    potentialSnapPoints.push(getVectorEnd_World(v));
                 }
             });
-
             for (const point of potentialSnapPoints) {
                 if (Math.hypot(draggedVec.pos.x - point.x, draggedVec.pos.y - point.y) < snapThreshold) {
                     return point;
@@ -718,7 +713,6 @@
             if (e.type === 'touchmove') e.preventDefault();
             const pos = getMousePos(e);
             let cursorSet = false;
-            
             if (isPanning) {
                 const dx = pos.x - panStart.x;
                 const dy = pos.y - panStart.y;
@@ -728,11 +722,9 @@
                 draw();
                 return;
             }
-
             if (!draggingState.item) {
                  const allDrawableVectors = [...vectorsOnCanvas];
                 if (showSumCheck.checked && vectorsOnCanvas.length > 0) allDrawableVectors.push(sumVector);
-
                 for (const v of allDrawableVectors) {
                     const end = getVectorEndCanvas(v);
                     const headDist = Math.hypot(pos.x - end.x, pos.y - end.y);
@@ -748,7 +740,6 @@
                 }
                 if (!cursorSet) canvasContainer.style.cursor = 'grab';
             }
-
             if (draggingState.item) {
                 const mouseWorldPos = canvasToWorld(pos);
                 if (draggingState.isNew) {
@@ -769,12 +760,6 @@
                 draggingState.item.pos = snapPoint;
             }
             snapPoint = null;
-
-            // --- LÓGICA DE ELIMINACIÓN DE VECTOR ELIMINADA ---
-            // Se ha quitado el bloque de código que comprobaba si el vector se soltaba
-            // sobre el panel de control. Esto simplifica el código y previene errores
-            // en dispositivos móviles. Para limpiar el canvas, se debe usar el botón "Reiniciar".
-            
             draggingState = { item: null, type: null, isNew: false };
             isPanning = false;
             canvasContainer.classList.remove('grabbing');
@@ -782,58 +767,25 @@
         }
 
         [showSumCheck, showValuesCheck, showGridCheck, showAnglesCheck].forEach(el => el.addEventListener('change', draw));
-        
-        showTriangularComponentsCheck.addEventListener('change', () => {
-            if (showTriangularComponentsCheck.checked) {
-                showRectangularComponentsCheck.checked = false;
-                showProjectionComponentsCheck.checked = false;
-                showParallelogramCheck.checked = false;
-            }
-            draw();
-        });
-        showRectangularComponentsCheck.addEventListener('change', () => {
-            if (showRectangularComponentsCheck.checked) {
-                showTriangularComponentsCheck.checked = false;
-                showProjectionComponentsCheck.checked = false;
-                showParallelogramCheck.checked = false;
-            }
-            draw();
-        });
-        showProjectionComponentsCheck.addEventListener('change', () => {
-            if (showProjectionComponentsCheck.checked) {
-                showTriangularComponentsCheck.checked = false;
-                showRectangularComponentsCheck.checked = false;
-                showParallelogramCheck.checked = false;
-            }
-            draw();
-        });
-        showParallelogramCheck.addEventListener('change', () => {
-            if (showParallelogramCheck.checked) {
-                showTriangularComponentsCheck.checked = false;
-                showRectangularComponentsCheck.checked = false;
-                showProjectionComponentsCheck.checked = false;
-            }
-            draw();
+        [showTriangularComponentsCheck, showRectangularComponentsCheck, showProjectionComponentsCheck, showParallelogramCheck].forEach(el => {
+            el.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    [showTriangularComponentsCheck, showRectangularComponentsCheck, showProjectionComponentsCheck, showParallelogramCheck].forEach(other => {
+                        if (other !== e.target) other.checked = false;
+                    });
+                }
+                draw();
+            });
         });
         
-        resetBtn.addEventListener('click', init);
-        
+        resetBtn.addEventListener('click', resetSimulation);
         zoomInBtn.addEventListener('click', () => { scale *= 1.2; draw(); });
         zoomOutBtn.addEventListener('click', () => { scale /= 1.2; draw(); });
 
-        window.addEventListener('resize', init);
-        
-        // Eventos de ratón
-        canvas.addEventListener('mousedown', handleMouseDown);
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-        
-        // Eventos táctiles
-        canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
-        window.addEventListener('touchmove', handleMouseMove, { passive: false });
-        window.addEventListener('touchend', handleMouseUp);
+        // --- INICIALIZACIÓN ---
+        window.addEventListener('resize', applyLayout);
+        window.addEventListener('load', applyLayout);
 
-        init();
     </script>
 </body>
 </html>
