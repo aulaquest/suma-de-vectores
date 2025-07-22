@@ -565,22 +565,30 @@
             return { x: clientX - rect.left, y: clientY - rect.top };
         }
         
+        // --- CORRECCIÓN: Lógica de arrastre desde el panel restaurada y mejorada ---
+        function handleSourceVectorStart(e) {
+            const el = e.currentTarget;
+            if (el.classList.contains('disabled')) return;
+            e.preventDefault();
+            
+            const newVector = {
+                id: el.dataset.id,
+                value: { x: parseFloat(el.dataset.vx), y: parseFloat(el.dataset.vy) },
+                color: el.dataset.color,
+                pos: canvasToWorld(getMousePos(e)) // El vector aparece donde se toca
+            };
+            
+            vectorsOnCanvas.push(newVector);
+            selectedVector = newVector;
+            draggingState = { item: newVector, type: 'body', isNew: true };
+            el.classList.add('disabled');
+            
+            draw();
+        }
+
         sourceVectors.forEach(el => {
-            el.addEventListener('pointerdown', (e) => {
-                if (el.classList.contains('disabled')) return;
-                e.preventDefault();
-                const newVector = {
-                    id: el.dataset.id,
-                    value: { x: parseFloat(el.dataset.vx), y: parseFloat(el.dataset.vy) },
-                    color: el.dataset.color,
-                    pos: canvasToWorld({ x: canvas.width / 2, y: canvas.height / 2 })
-                };
-                vectorsOnCanvas.push(newVector);
-                selectedVector = newVector;
-                draggingState = { item: newVector, type: 'body', isNew: true };
-                el.classList.add('disabled');
-                draw();
-            });
+            el.addEventListener('mousedown', handleSourceVectorStart);
+            el.addEventListener('touchstart', handleSourceVectorStart, { passive: false });
         });
 
         function handleMouseDown(e) {
@@ -685,21 +693,19 @@
             }
             if (draggingState.item) {
                 const mouseWorldPos = canvasToWorld(pos);
-                if (draggingState.isNew) {
+                if (draggingState.isNew || draggingState.type === 'body') {
                     draggingState.item.pos = mouseWorldPos;
+                    snapPoint = checkForSnap(draggingState.item);
                 } else if (draggingState.type === 'head') {
                     draggingState.item.value.x = mouseWorldPos.x - draggingState.item.pos.x;
                     draggingState.item.value.y = mouseWorldPos.y - draggingState.item.pos.y;
-                } else if (draggingState.type === 'body') {
-                    draggingState.item.pos = mouseWorldPos;
-                    snapPoint = checkForSnap(draggingState.item);
                 }
                 draw();
             }
         }
         
         function handleMouseUp(e) {
-            if (snapPoint && draggingState.item && draggingState.type === 'body') {
+            if (snapPoint && draggingState.item && (draggingState.type === 'body' || draggingState.isNew)) {
                 draggingState.item.pos = snapPoint;
             }
             snapPoint = null;
@@ -725,7 +731,6 @@
         zoomInBtn.addEventListener('click', () => { scale *= 1.2; draw(); });
         zoomOutBtn.addEventListener('click', () => { scale /= 1.2; draw(); });
 
-        // --- CORRECCIÓN: Event listeners de interacción restaurados ---
         canvas.addEventListener('mousedown', handleMouseDown);
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseup', handleMouseUp);
