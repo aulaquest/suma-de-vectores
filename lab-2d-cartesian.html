@@ -101,14 +101,14 @@
             
             <div class="text-center mt-6">
                  <a href="./index.html" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors w-full inline-block">
-                      &larr; Volver al Menú Principal
+                     &larr; Volver al Menú Principal
                  </a>
-                <p class="text-xs text-gray-500 mt-4">
-                    Simulación creada por 
-                    <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
-                        AulaQuest
-                    </a>
-                </p>
+                 <p class="text-xs text-gray-500 mt-4">
+                     Simulación creada por 
+                     <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
+                         AulaQuest
+                     </a>
+                 </p>
             </div>
         </div>
     </div>
@@ -143,15 +143,22 @@
         let panStart = { x: 0, y: 0 };
         let snapPoint = null;
         
-        function init() {
+        // --- CAMBIO: Función para manejar el redimensionamiento ---
+        function handleResize() {
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
             origin = { x: 50, y: canvas.height - 50 };
+            draw();
+        }
+        
+        // --- CAMBIO: init() ahora solo reinicia la simulación ---
+        function init() {
             vectorsOnCanvas = [];
             selectedVector = null;
             sumVector.pos = { x: 0, y: 0 }; 
             sourceVectors.forEach(el => el.classList.remove('disabled'));
-            draw();
+            // Llamamos a handleResize para asegurar que el canvas tenga el tamaño correcto antes de dibujar
+            handleResize();
         }
 
         function draw() {
@@ -737,7 +744,8 @@
         window.addEventListener('touchmove', handleMouseMove, { passive: false });
         window.addEventListener('touchend', handleMouseUp);
 
-        window.addEventListener('resize', init);
+        // --- CAMBIO: Usar la nueva función para el redimensionamiento ---
+        window.addEventListener('resize', handleResize);
         window.addEventListener('load', init);
 
     </script>
