@@ -143,7 +143,6 @@
         let panStart = { x: 0, y: 0 };
         let snapPoint = null;
         
-        // --- CAMBIO: Función para manejar el redimensionamiento ---
         function handleResize() {
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
@@ -151,13 +150,11 @@
             draw();
         }
         
-        // --- CAMBIO: init() ahora solo reinicia la simulación ---
         function init() {
             vectorsOnCanvas = [];
             selectedVector = null;
             sumVector.pos = { x: 0, y: 0 }; 
             sourceVectors.forEach(el => el.classList.remove('disabled'));
-            // Llamamos a handleResize para asegurar que el canvas tenga el tamaño correcto antes de dibujar
             handleResize();
         }
 
@@ -616,8 +613,10 @@
                     draggingState.type = 'body';
                 } else {
                     const end = getVectorEndCanvas(selectedVector);
+                    // --- CAMBIO: Aumentar el área de toque para la cabeza del vector en móvil ---
+                    const headHitboxSize = 25; // Era 15, muy pequeño para dedos
                     const headDist = Math.hypot(pos.x - end.x, pos.y - end.y);
-                    draggingState = { item: selectedVector, type: headDist < 15 ? 'head' : 'body' };
+                    draggingState = { item: selectedVector, type: headDist < headHitboxSize ? 'head' : 'body' };
                 }
             } else {
                 isPanning = true;
@@ -638,7 +637,9 @@
             const closestX = start.x + clampedT * dx;
             const closestY = start.y + clampedT * dy;
             const dist = Math.hypot(pos.x - closestX, pos.y - closestY);
-            return dist < 10;
+            // --- CAMBIO: Aumentar el área de toque para el cuerpo del vector en móvil ---
+            const bodyHitboxSize = 20; // Era 10
+            return dist < bodyHitboxSize;
         }
 
         function getVectorEnd_World(vec) {
@@ -666,10 +667,13 @@
         }
 
         function handleMouseMove(e) {
-            if (e.type === 'touchmove') e.preventDefault();
+            // --- CAMBIO: Mover e.preventDefault() para permitir el scroll del panel de control ---
+            // Ya no se previene el scroll por defecto en toda la ventana, solo cuando se arrastra algo.
+            
             const pos = getMousePos(e);
             let cursorSet = false;
             if (isPanning) {
+                if (e.type === 'touchmove') e.preventDefault(); // Prevenir scroll solo si estamos moviendo el canvas
                 const dx = pos.x - panStart.x;
                 const dy = pos.y - panStart.y;
                 origin.x += dx;
@@ -697,6 +701,7 @@
                 if (!cursorSet) canvasContainer.style.cursor = 'grab';
             }
             if (draggingState.item) {
+                if (e.type === 'touchmove') e.preventDefault(); // Prevenir scroll solo si estamos arrastrando un vector
                 const mouseWorldPos = canvasToWorld(pos);
                 if (draggingState.isNew || draggingState.type === 'body') {
                     draggingState.item.pos = mouseWorldPos;
@@ -744,7 +749,6 @@
         window.addEventListener('touchmove', handleMouseMove, { passive: false });
         window.addEventListener('touchend', handleMouseUp);
 
-        // --- CAMBIO: Usar la nueva función para el redimensionamiento ---
         window.addEventListener('resize', handleResize);
         window.addEventListener('load', init);
 
