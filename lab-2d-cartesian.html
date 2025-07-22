@@ -151,6 +151,10 @@
         }
         
         function init() {
+            // --- TAREA 2: Establecer zoom inicial según el dispositivo ---
+            const isMobile = window.innerWidth < 768;
+            scale = isMobile ? 25 : 45; // Más alejado en móvil, más cercano en escritorio
+
             vectorsOnCanvas = [];
             selectedVector = null;
             sumVector.pos = { x: 0, y: 0 }; 
@@ -577,7 +581,8 @@
                 id: el.dataset.id,
                 value: { x: parseFloat(el.dataset.vx), y: parseFloat(el.dataset.vy) },
                 color: el.dataset.color,
-                pos: canvasToWorld({ x: canvas.width / 2, y: canvas.height / 2 })
+                // --- TAREA 1: El vector nuevo siempre aparece en el origen del plano (0,0) ---
+                pos: { x: 0, y: 0 }
             };
             
             vectorsOnCanvas.push(newVector);
@@ -585,7 +590,8 @@
             draggingState = { item: newVector, type: 'body', isNew: true };
             el.classList.add('disabled');
             
-            handleMouseMove(e);
+            // --- TAREA 1: Se dibuja inmediatamente para mostrar el vector en su nueva posición inicial ---
+            draw();
         }
 
         sourceVectors.forEach(el => {
@@ -613,8 +619,7 @@
                     draggingState.type = 'body';
                 } else {
                     const end = getVectorEndCanvas(selectedVector);
-                    // --- CAMBIO: Aumentar el área de toque para la cabeza del vector en móvil ---
-                    const headHitboxSize = 25; // Era 15, muy pequeño para dedos
+                    const headHitboxSize = 25; 
                     const headDist = Math.hypot(pos.x - end.x, pos.y - end.y);
                     draggingState = { item: selectedVector, type: headDist < headHitboxSize ? 'head' : 'body' };
                 }
@@ -637,8 +642,7 @@
             const closestX = start.x + clampedT * dx;
             const closestY = start.y + clampedT * dy;
             const dist = Math.hypot(pos.x - closestX, pos.y - closestY);
-            // --- CAMBIO: Aumentar el área de toque para el cuerpo del vector en móvil ---
-            const bodyHitboxSize = 20; // Era 10
+            const bodyHitboxSize = 20;
             return dist < bodyHitboxSize;
         }
 
@@ -667,13 +671,10 @@
         }
 
         function handleMouseMove(e) {
-            // --- CAMBIO: Mover e.preventDefault() para permitir el scroll del panel de control ---
-            // Ya no se previene el scroll por defecto en toda la ventana, solo cuando se arrastra algo.
-            
             const pos = getMousePos(e);
             let cursorSet = false;
             if (isPanning) {
-                if (e.type === 'touchmove') e.preventDefault(); // Prevenir scroll solo si estamos moviendo el canvas
+                if (e.type === 'touchmove') e.preventDefault();
                 const dx = pos.x - panStart.x;
                 const dy = pos.y - panStart.y;
                 origin.x += dx;
@@ -701,7 +702,7 @@
                 if (!cursorSet) canvasContainer.style.cursor = 'grab';
             }
             if (draggingState.item) {
-                if (e.type === 'touchmove') e.preventDefault(); // Prevenir scroll solo si estamos arrastrando un vector
+                if (e.type === 'touchmove') e.preventDefault();
                 const mouseWorldPos = canvasToWorld(pos);
                 if (draggingState.isNew || draggingState.type === 'body') {
                     draggingState.item.pos = mouseWorldPos;
