@@ -2,7 +2,7 @@
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Laboratorio 2D Cartesiano - Adición de Vectores</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
@@ -11,10 +11,9 @@
             font-family: 'Inter', sans-serif; 
         }
         html, body {
-            height: 100vh;
+            height: 100vh; /* Altura total de la ventana para evitar problemas en móviles */
             overflow: hidden; 
         }
-        
         #canvas-container { 
             cursor: grab;
         }
@@ -565,7 +564,6 @@
             return { x: clientX - rect.left, y: clientY - rect.top };
         }
         
-        // --- CORRECCIÓN: Lógica de arrastre desde el panel restaurada y mejorada ---
         function handleSourceVectorStart(e) {
             const el = e.currentTarget;
             if (el.classList.contains('disabled')) return;
@@ -575,7 +573,7 @@
                 id: el.dataset.id,
                 value: { x: parseFloat(el.dataset.vx), y: parseFloat(el.dataset.vy) },
                 color: el.dataset.color,
-                pos: canvasToWorld(getMousePos(e)) // El vector aparece donde se toca
+                pos: canvasToWorld({ x: canvas.width / 2, y: canvas.height / 2 })
             };
             
             vectorsOnCanvas.push(newVector);
@@ -583,7 +581,7 @@
             draggingState = { item: newVector, type: 'body', isNew: true };
             el.classList.add('disabled');
             
-            draw();
+            handleMouseMove(e);
         }
 
         sourceVectors.forEach(el => {
