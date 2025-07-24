@@ -11,8 +11,8 @@
             font-family: 'Inter', sans-serif; 
         }
         html, body {
-            height: 100vh;
-            overflow: hidden; 
+            height: 100vh; /* Ocupa el 100% de la altura de la ventana */
+            overflow: hidden; /* Evita el scroll en la página principal */
         }
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
@@ -35,11 +35,19 @@
 </head>
 <body class="bg-gray-900 text-gray-200 h-screen">
 
-    <!-- Contenedor principal: Se elimina la lógica 'flex-col' y se deja solo 'flex-row' para una vista de escritorio fija. -->
-    <div class="w-full h-full flex flex-row">
+    <!-- 
+      Contenedor principal:
+      - Por defecto es 'flex-col' (vista móvil, un elemento encima de otro).
+      - A partir del breakpoint 'md' (768px), cambia a 'flex-row' (vista escritorio, un elemento al lado del otro).
+    -->
+    <div class="w-full h-full flex flex-col md:flex-row">
         
-        <!-- Contenedor del Canvas: Se eliminan las clases responsivas. Ahora siempre ocupa el 75% del ancho. -->
-        <div id="canvas-container" class="relative h-full w-[75%]">
+        <!-- 
+          Contenedor del Canvas:
+          - En móvil (por defecto), ocupa el 60% de la altura ('h-[60%]').
+          - En escritorio ('md:'), ocupa el 100% de la altura y el 75% del ancho.
+        -->
+        <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -51,9 +59,13 @@
         </div>
 
         <!--  
-          Panel de Control: Se eliminan las clases responsivas. Ahora siempre ocupa el 25% del ancho y tiene scroll si es necesario.
+          Panel de Control:
+          - En móvil (por defecto), 'flex-1' hace que ocupe el espacio restante (40%).
+          - 'min-h-0' es clave para que 'overflow-y-auto' funcione correctamente en un contenedor flex.
+          - 'overflow-y-auto' crea el scroll interno SOLO cuando es necesario.
+          - En escritorio ('md:'), pasa a tener un ancho del 25% y se comporta como una columna lateral.
         -->
-        <div id="control-panel" class="bg-gray-800 p-4 border-l-2 border-cyan-800 w-[25%] overflow-y-auto">
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none">
             <div class="space-y-6 pb-6">
                 <div class="bg-gray-900/50 p-3 rounded-lg">
                     <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
@@ -137,8 +149,13 @@
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
 
-            // Se elimina la lógica de reescalado para móvil
-            scale = 30;
+            // Se reintroduce la lógica de reescalado para una mejor experiencia en móvil
+            const isMobile = window.innerWidth < 768;
+            if (orientation === 'vertical') {
+                scale = isMobile ? 15 : 20;
+            } else {
+                scale = isMobile ? 20 : 30;
+            }
 
             origin = { x: canvas.width / 2, y: canvas.height / 2 };
             vectorsOnCanvas = [];
