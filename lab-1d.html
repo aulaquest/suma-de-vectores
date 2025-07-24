@@ -51,13 +51,13 @@
         </div>
 
         <!--  
-          Panel de Control: ESTRUCTURA FINAL Y CORRECTA
-          - Las clases 'p-4', 'flex-1', 'min-h-0' y 'overflow-y-auto' se aplican DIRECTAMENTE a este div.
-          - Como este div es un item flex (hijo de 'flex-col'), 'flex-1' le da el alto restante.
-          - 'min-h-0' previene problemas de overflow en flexbox.
-          - 'overflow-y-auto' hace que el propio panel tenga scroll cuando su contenido interno es más alto que el espacio que se le ha asignado.
+          Panel de Control: SOLUCIÓN DEFINITIVA
+          - Se reemplaza 'flex-1' y 'min-h-0' por una altura explícita en móvil 'h-[40%]'.
+          - Esto le da al panel una altura fija y limitada (el 40% de la pantalla).
+          - Con una altura fija, 'overflow-y-auto' AHORA SÍ funciona porque el navegador sabe cuándo se desborda el contenido.
+          - En desktop, 'md:h-full' asegura que ocupe toda la altura de la columna.
         -->
-        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 p-4 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none">
+        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 p-4 h-[40%] md:h-full overflow-y-auto md:w-[25%] md:flex-none">
             <div class="space-y-6 pb-6">
                 <div class="bg-gray-900/50 p-3 rounded-lg">
                     <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
@@ -111,7 +111,6 @@
     </div>
     
     <script>
-        // Se ha eliminado el envoltorio (IIFE) para prevenir errores de sintaxis. La funcionalidad es idéntica.
         const canvas = document.getElementById('vectorCanvas');
         const ctx = canvas.getContext('2d');
         const canvasContainer = document.getElementById('canvas-container');
