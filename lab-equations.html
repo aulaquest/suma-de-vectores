@@ -568,6 +568,15 @@
         }
         
         function init() {
+            // Reset scale based on screen width for a better initial zoom on desktop
+            scale = window.innerWidth > 768 ? 40 : 25;
+
+            // Reset vectors to their initial state
+            vectorA.value.x = 2;
+            vectorA.value.y = 5;
+            vectorB.value.x = 6;
+            vectorB.value.y = 3;
+            
             setCoordinateMode('cartesian');
             updateAllInputsFromState();
             updateSumAndDraw();
