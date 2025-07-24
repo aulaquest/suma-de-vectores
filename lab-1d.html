@@ -88,6 +88,7 @@
                          <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
                      </div>
                      <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
+                     <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
                 </div>
 
                 <div class="pt-4 text-xs text-gray-500 text-center">
@@ -132,7 +133,6 @@
             canvas.height = canvasContainer.clientHeight;
 
             const isMobile = window.innerWidth < 768;
-            // CAMBIO: Valores de escala reducidos para un zoom más alejado
             if (orientation === 'vertical') {
                 scale = isMobile ? 15 : 20;
             } else {
