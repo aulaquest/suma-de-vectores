@@ -38,7 +38,7 @@
     <!-- Contenedor principal Flexbox. -->
     <div class="w-full h-full flex flex-col md:flex-row">
         
-        <!-- Contenedor del Canvas: Se elimina 'flex-shrink-0' para igualar al ejemplo funcional. -->
+        <!-- Contenedor del Canvas -->
         <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
@@ -51,11 +51,8 @@
         </div>
 
         <!--  
-          Panel de Control: ESTRUCTURA CORREGIDA Y FINAL
-          - Se aplican las clases EXACTAS del ejemplo que funciona: 'flex-1 min-h-0 overflow-y-auto'.
-          - 'flex-1' para que ocupe el espacio sobrante.
-          - 'min-h-0' para forzar a que el overflow funcione correctamente en un contenedor flex. ESTA ERA LA CLAVE.
-          - 'overflow-y-auto' para que aparezca el scroll cuando sea necesario.
+          Panel de Control con la estructura correcta.
+          La combinación de 'flex-1 min-h-0 overflow-y-auto' es la clave.
         -->
         <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none">
             <div class="space-y-6 pb-6">
@@ -98,6 +95,13 @@
                      </div>
                      <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
                      <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
+                </div>
+
+                <!-- TEXTO DE RELLENO PARA FORZAR EL SCROLL -->
+                <div class="text-xs text-gray-400 space-y-2">
+                    <p>Este es un texto de prueba para forzar que el contenido del panel sea más alto que el espacio disponible. Si puedes leer esto y deslizar el panel hacia arriba y abajo, significa que la estructura del layout es correcta.</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh.</p>
+                    <p>Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam. Sorbi et morbi. Duis ac turpis. Integer rutrum ante eu lacus. Vestibulum libero nisl, porta vel, scelerisque eget, malesuada at, neque. Vivamus eget nibh. Etiam cursus leo vel metus. Nulla facilisi. Aenean nec eros. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse sollicitudin velit sed leo. Ut pharetra augue nec augue. Nam elit agna, endrerit sit amet, tincidunt ac, viverra sed, nulla. Donec porta diam eu massa. Quisque diam lorem, interdum vitae, dapibus ac, scelerisque vitae, pede. Donec eget tellus non erat lacinia fermentum. Donec in velit vel ipsum auctor pulvinar.</p>
                 </div>
 
                 <div class="pt-4 text-xs text-gray-500 text-center">
