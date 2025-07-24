@@ -10,12 +10,23 @@
         body { 
             font-family: 'Inter', sans-serif; 
         }
+        /* CAMBIO CLAVE 1: Usar 'dvh' (Dynamic Viewport Height) en lugar de 'vh'.
+           Esto es mucho más robusto en navegadores móviles, ya que se ajusta
+           correctamente cuando la barra de direcciones aparece o desaparece. */
         html, body {
-            height: 100vh;
+            height: 100dvh;
             overflow: hidden; 
         }
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
+        
+        /* CAMBIO CLAVE 2: Se añaden propiedades para forzar un scroll más nativo y
+           solucionar bugs de renderizado en navegadores móviles (especialmente WebKit/Safari). */
+        #control-panel {
+            -webkit-overflow-scrolling: touch; /* Habilita el scroll con inercia en iOS. */
+            transform: translateZ(0); /* Fuerza la aceleración por hardware en el panel. */
+        }
+
         .source-vector.disabled { opacity: 0.4; cursor: not-allowed; }
         .form-checkbox {
             -webkit-appearance: none; appearance: none;
@@ -35,7 +46,7 @@
 </head>
 <body class="bg-gray-900 text-gray-200 h-screen">
 
-    <!-- Contenedor principal Flexbox. -->
+    <!-- El h-screen (100vh) del body se sobreescribe en el CSS por 100dvh -->
     <div class="w-full h-full flex flex-col md:flex-row">
         
         <!-- Contenedor del Canvas -->
@@ -95,13 +106,6 @@
                      </div>
                      <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
                      <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
-                </div>
-
-                <!-- TEXTO DE RELLENO PARA FORZAR EL SCROLL -->
-                <div class="text-xs text-gray-400 space-y-2">
-                    <p>Este es un texto de prueba para forzar que el contenido del panel sea más alto que el espacio disponible. Si puedes leer esto y deslizar el panel hacia arriba y abajo, significa que la estructura del layout es correcta.</p>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh.</p>
-                    <p>Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam. Sorbi et morbi. Duis ac turpis. Integer rutrum ante eu lacus. Vestibulum libero nisl, porta vel, scelerisque eget, malesuada at, neque. Vivamus eget nibh. Etiam cursus leo vel metus. Nulla facilisi. Aenean nec eros. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse sollicitudin velit sed leo. Ut pharetra augue nec augue. Nam elit agna, endrerit sit amet, tincidunt ac, viverra sed, nulla. Donec porta diam eu massa. Quisque diam lorem, interdum vitae, dapibus ac, scelerisque vitae, pede. Donec eget tellus non erat lacinia fermentum. Donec in velit vel ipsum auctor pulvinar.</p>
                 </div>
 
                 <div class="pt-4 text-xs text-gray-500 text-center">
