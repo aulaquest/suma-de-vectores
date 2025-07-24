@@ -35,11 +35,11 @@
 </head>
 <body class="bg-gray-900 text-gray-200 h-screen">
 
-    <!-- Contenedor principal Flexbox. Es 'flex-col' en móvil y 'flex-row' en desktop -->
+    <!-- Contenedor principal Flexbox. -->
     <div class="w-full h-full flex flex-col md:flex-row">
         
-        <!-- Contenedor del Canvas: 60% de altura en móvil, 100% en desktop -->
-        <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%] flex-shrink-0">
+        <!-- Contenedor del Canvas: Se elimina 'flex-shrink-0' para igualar al ejemplo funcional. -->
+        <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -51,13 +51,13 @@
         </div>
 
         <!--  
-          Panel de Control: SOLUCIÓN DEFINITIVA
-          - Se reemplaza 'flex-1' y 'min-h-0' por una altura explícita en móvil 'h-[40%]'.
-          - Esto le da al panel una altura fija y limitada (el 40% de la pantalla).
-          - Con una altura fija, 'overflow-y-auto' AHORA SÍ funciona porque el navegador sabe cuándo se desborda el contenido.
-          - En desktop, 'md:h-full' asegura que ocupe toda la altura de la columna.
+          Panel de Control: ESTRUCTURA CORREGIDA Y FINAL
+          - Se aplican las clases EXACTAS del ejemplo que funciona: 'flex-1 min-h-0 overflow-y-auto'.
+          - 'flex-1' para que ocupe el espacio sobrante.
+          - 'min-h-0' para forzar a que el overflow funcione correctamente en un contenedor flex. ESTA ERA LA CLAVE.
+          - 'overflow-y-auto' para que aparezca el scroll cuando sea necesario.
         -->
-        <div id="control-panel" class="bg-gray-800 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 p-4 h-[40%] md:h-full overflow-y-auto md:w-[25%] md:flex-none">
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none">
             <div class="space-y-6 pb-6">
                 <div class="bg-gray-900/50 p-3 rounded-lg">
                     <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
