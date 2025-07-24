@@ -22,7 +22,7 @@
         .form-checkbox {
             -webkit-appearance: none; appearance: none;
             background-color: #4a5568; border: 1px solid #718096;
-            border-radius: 0.25rem; width: 1.1em; height: 1.1em;
+            border-radius: 0.25rem; width: 1em; height: 1em;
             display: inline-block; vertical-align: middle;
             position: relative; cursor: pointer;
             flex-shrink: 0;
@@ -80,7 +80,6 @@
 
                 <!-- Panel de edición de vectores -->
                 <div class="bg-gray-900/50 p-3 rounded-lg">
-                     <h3 class="text-sm font-bold text-center mb-3 text-gray-300 uppercase tracking-wider">Vectores Base</h3>
                     <div class="space-y-3">
                         <!-- Vector A -->
                         <div>
@@ -121,24 +120,24 @@
 
                 <div>
                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTAS</h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center text-sm cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-3">Mostrar Suma (s)</label>
-                        <label class="flex items-center text-sm cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-3" checked>Mostrar Rejilla</label>
-                        <label class="flex items-center text-sm cursor-pointer"><input type="checkbox" id="show-coords-on-canvas" class="form-checkbox mr-3">Coords. en Vector</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-coords-on-canvas" class="form-checkbox mr-2">Coords. en Vector</label>
                     </div>
                 </div>
 
                 <div>
                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">COMPONENTES</h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center text-sm cursor-pointer"><input type="checkbox" name="component-type" id="show-rectangular-components" class="form-checkbox mr-3">Rectangulares</label>
-                        <label class="flex items-center text-sm cursor-pointer"><input type="checkbox" name="component-type" id="show-triangular-components" class="form-checkbox mr-3">Suma Triangular</label>
-                        <label class="flex items-center text-sm cursor-pointer"><input type="checkbox" name="component-type" id="show-projection-components" class="form-checkbox mr-3">Proyección en Ejes</label>
-                        <label class="flex items-center text-sm cursor-pointer"><input type="checkbox" name="component-type" id="show-parallelogram" class="form-checkbox mr-3">Paralelogramo</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" name="component-type" id="show-rectangular-components" class="form-checkbox mr-2">Rectangulares</label>
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" name="component-type" id="show-triangular-components" class="form-checkbox mr-2">Triangulares</label>
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" name="component-type" id="show-projection-components" class="form-checkbox mr-2">Proyección en Ejes</label>
+                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" name="component-type" id="show-parallelogram" class="form-checkbox mr-2">Paralelogramo</label>
                     </div>
                 </div>
                 
-                 <div class="pt-4">
+                <div class="pt-4">
                     <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
                     <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
                     <p class="text-xs text-gray-500 mt-4 text-center">
@@ -147,9 +146,8 @@
                             AulaQuest
                         </a>
                     </p>
-                 </div>
+                </div>
             </div>
-            
         </div>
     </div>
 
@@ -194,6 +192,7 @@
         let selectedVector = null;
         let isPanning = false;
         let panStart = { x: 0, y: 0 };
+        let isUpdating = false; // Flag para prevenir bucles de actualización
 
         // --- UTILIDADES ---
         function worldToCanvas(worldPos) { return { x: origin.x + worldPos.x * scale, y: origin.y - worldPos.y * scale }; }
@@ -202,25 +201,43 @@
         function drawArrow(fromx, fromy, tox, toy, color) {
             const headlen = 10;
             const angle = Math.atan2(toy - fromy, tox - fromx);
-            ctx.strokeStyle = color; ctx.fillStyle = color;
-            ctx.beginPath(); ctx.moveTo(fromx, fromy); ctx.lineTo(tox, toy); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(tox, toy);
+            ctx.strokeStyle = color; 
+            ctx.fillStyle = color;
+            
+            ctx.beginPath(); 
+            ctx.moveTo(fromx, fromy); 
+            ctx.lineTo(tox, toy); 
+            ctx.stroke();
+            
+            ctx.beginPath(); 
+            ctx.moveTo(tox, toy);
             ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
             ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
-            ctx.closePath(); ctx.fill();
+            ctx.closePath(); 
+            ctx.fill();
         }
 
         // --- LÓGICA DE DIBUJO ---
         function drawGrid() {
-            ctx.strokeStyle = '#2d3748'; ctx.lineWidth = 1;
-            for (let x = origin.x % scale; x < canvas.width; x += scale) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-            for (let x = origin.x % scale; x > 0; x -= scale) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-            for (let y = origin.y % scale; y < canvas.height; y += scale) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
-            for (let y = origin.y % scale; y > 0; y -= scale) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+            ctx.strokeStyle = '#2d3748';
+            ctx.lineWidth = 1;
+            for (let x = origin.x % scale; x < canvas.width; x += scale) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let x = (origin.x % scale) - scale; x >= 0; x -= scale) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for (let y = origin.y % scale; y < canvas.height; y += scale) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+            for (let y = (origin.y % scale) - scale; y >= 0; y -= scale) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
         }
 
         function drawAxis() {
-            ctx.strokeStyle = '#718096'; ctx.lineWidth = 2;
+            ctx.strokeStyle = '#718096';
+            ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(0, origin.y); ctx.lineTo(canvas.width, origin.y);
             ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, canvas.height);
@@ -230,27 +247,24 @@
         function drawAxisLabels() {
             ctx.fillStyle = '#718096';
             ctx.font = '10px Inter';
+            const step = scale > 40 ? 1 : (scale > 20 ? 2 : (scale > 10 ? 5 : 10));
+
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
-
-            const step = scale > 40 ? 1 : scale > 20 ? 2 : scale > 10 ? 5 : 10;
-
-            for (let i = step; i * scale < canvas.width - origin.x; i += step) {
-                const pos = worldToCanvas({x: i, y: 0});
-                ctx.fillText(i, pos.x, pos.y + 5);
-            }
-            for (let i = -step; i * scale > -origin.x; i -= step) {
+            const startWorldX = Math.floor(-origin.x / scale / step) * step;
+            const endWorldX = Math.ceil((canvas.width - origin.x) / scale / step) * step;
+            for (let i = startWorldX; i <= endWorldX; i += step) {
+                if (i === 0) continue;
                 const pos = worldToCanvas({x: i, y: 0});
                 ctx.fillText(i, pos.x, pos.y + 5);
             }
 
             ctx.textAlign = 'right';
             ctx.textBaseline = 'middle';
-            for (let i = step; i * scale < origin.y; i += step) {
-                const pos = worldToCanvas({x: 0, y: i});
-                ctx.fillText(i, pos.x - 5, pos.y);
-            }
-            for (let i = -step; i * scale < canvas.height - origin.y; i -= step) {
+            const startWorldY = Math.floor(-(canvas.height - origin.y) / scale / step) * step;
+            const endWorldY = Math.ceil(origin.y / scale / step) * step;
+             for (let i = startWorldY; i <= endWorldY; i += step) {
+                if (i === 0) continue;
                 const pos = worldToCanvas({x: 0, y: i});
                 ctx.fillText(i, pos.x - 5, pos.y);
             }
@@ -275,7 +289,7 @@
             ctx.lineTo(end.x - headlen * Math.cos(angle + Math.PI / 6), end.y - headlen * Math.sin(angle + Math.PI / 6));
             ctx.closePath(); ctx.fill();
         }
-        
+
         function drawVectorMagnitude(vec) {
             const start = worldToCanvas(vec.pos);
             const end = getVectorEndCanvas(vec);
@@ -293,26 +307,18 @@
             ctx.restore();
         }
 
-        function drawComponentAnnotations(vec, showComponents = true) {
-            if (!showCoordsOnCanvasCheck.checked) return;
-            drawVectorMagnitude(vec); 
-            
-            if (!showComponents) return;
-
+        function drawComponentValueAnnotations(vec) {
             const start = worldToCanvas(vec.pos);
             const end = getVectorEndCanvas(vec);
             const corner = worldToCanvas({x: vec.pos.x + vec.value.x, y: vec.pos.y});
-
             ctx.save();
             ctx.fillStyle = vec.color; ctx.font = 'bold 13px Inter';
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            
             const xLabelYOffset = (vec.value.y >= 0 ? 15 : -15);
             ctx.fillText(vec.value.x.toFixed(1), (start.x + corner.x) / 2, start.y + xLabelYOffset);
             ctx.textAlign = (vec.value.x >= 0 ? 'left' : 'right');
             const yLabelXOffset = (vec.value.x >= 0 ? 8 : -8);
             ctx.fillText(vec.value.y.toFixed(1), corner.x + yLabelXOffset, (corner.y + end.y) / 2);
-            
             ctx.restore();
         }
 
@@ -321,87 +327,80 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#1a202c';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             if (showGridCheck.checked) drawGrid();
             drawAxis();
             drawAxisLabels();
 
             const activeComponent = Array.from(componentCheckboxes).find(cb => cb.checked)?.id;
-            
             const vectorsToProcess = [...vectorsOnCanvas];
             if (showSumCheck.checked) vectorsToProcess.push(sumVector);
 
-            // Dibujar la geometría de los componentes primero
-            if (activeComponent === 'show-triangular-components') {
-                vectorsToProcess.forEach(vec => {
-                    if (vec.value.x === 0 && vec.value.y === 0) return;
-                    const start = worldToCanvas(vec.pos);
-                    const corner = worldToCanvas({x: vec.pos.x + vec.value.x, y: vec.pos.y});
-                    const end = getVectorEndCanvas(vec);
+            if (activeComponent) {
+                if (activeComponent === 'show-parallelogram') {
+                    const endA = getVectorEndCanvas(vectorA);
+                    const endB = getVectorEndCanvas(vectorB);
+                    const endSum = getVectorEndCanvas(sumVector);
                     ctx.save();
-                    ctx.strokeStyle = vec.color; ctx.globalAlpha = 0.8; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
-                    ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(corner.x, start.y); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(corner.x, start.y); ctx.lineTo(corner.x, end.y); ctx.stroke();
+                    ctx.setLineDash([5, 5]); ctx.lineWidth = 2; ctx.globalAlpha = 0.7;
+                    ctx.strokeStyle = vectorB.color; ctx.beginPath(); ctx.moveTo(endA.x, endA.y); ctx.lineTo(endSum.x, endSum.y); ctx.stroke();
+                    ctx.strokeStyle = vectorA.color; ctx.beginPath(); ctx.moveTo(endB.x, endB.y); ctx.lineTo(endSum.x, endSum.y); ctx.stroke();
                     ctx.restore();
-                });
-            } else if (activeComponent === 'show-rectangular-components') {
-                 vectorsToProcess.forEach(vec => {
-                    const start = worldToCanvas(vec.pos);
-                    const end = getVectorEndCanvas(vec);
-                    const corner = worldToCanvas({x: vec.pos.x + vec.value.x, y: vec.pos.y});
-                    ctx.save();
-                    ctx.strokeStyle = vec.color; ctx.globalAlpha = 0.5; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
-                    ctx.beginPath(); ctx.moveTo(corner.x, corner.y); ctx.lineTo(end.x, end.y); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(start.x, corner.y); ctx.lineTo(corner.x, corner.y); ctx.stroke();
-                    ctx.restore();
-                });
-            } else if (activeComponent === 'show-parallelogram') {
-                const endA = getVectorEndCanvas(vectorA);
-                const endB = getVectorEndCanvas(vectorB);
-                const endSum = getVectorEndCanvas(sumVector);
-                ctx.save();
-                ctx.setLineDash([5, 5]); ctx.lineWidth = 2; ctx.globalAlpha = 0.7;
-                ctx.strokeStyle = vectorB.color; ctx.beginPath(); ctx.moveTo(endA.x, endA.y); ctx.lineTo(endSum.x, endSum.y); ctx.stroke();
-                ctx.strokeStyle = vectorA.color; ctx.beginPath(); ctx.moveTo(endB.x, endB.y); ctx.lineTo(endSum.x, endSum.y); ctx.stroke();
-                ctx.restore();
-            } else if (activeComponent === 'show-projection-components') {
-                 const pixelOffset = 14; 
-                 vectorsToProcess.forEach((vec, index) => {
-                     if (vec.value.x === 0 && vec.value.y === 0) return;
-                     const yPosForXComp = origin.y + pixelOffset * (index + 1);
-                     const xPosForYComp = origin.x - pixelOffset * (index + 1);
-                     ctx.save();
-                     ctx.strokeStyle = vec.color; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
-                     const startX = worldToCanvas({x: vec.pos.x, y: 0});
-                     const endX = worldToCanvas({x: vec.pos.x + vec.value.x, y: 0});
-                     drawArrow(startX.x, yPosForXComp, endX.x, yPosForXComp, vec.color);
-                     const startY = worldToCanvas({x: 0, y: vec.pos.y});
-                     const endY = worldToCanvas({x: 0, y: vec.pos.y + vec.value.y});
-                     drawArrow(xPosForYComp, startY.y, xPosForYComp, endY.y, vec.color);
-                     ctx.restore();
-                 });
-                 ctx.save();
-                 ctx.setLineDash([2, 3]); ctx.lineWidth = 1; ctx.globalAlpha = 0.5;
-                 vectorsToProcess.forEach(vec => {
-                     const end = getVectorEndCanvas(vec);
-                     ctx.strokeStyle = vec.color;
-                     ctx.beginPath(); ctx.moveTo(end.x, end.y); ctx.lineTo(end.x, origin.y); ctx.stroke();
-                     ctx.beginPath(); ctx.moveTo(end.x, end.y); ctx.lineTo(origin.x, end.y); ctx.stroke();
-                 });
-                 ctx.restore();
+                } else {
+                    vectorsToProcess.forEach(vec => {
+                        if (vec.value.x === 0 && vec.value.y === 0) return;
+                        const start = worldToCanvas(vec.pos);
+                        const end = getVectorEndCanvas(vec);
+                        const corner = worldToCanvas({x: vec.pos.x + vec.value.x, y: vec.pos.y});
+                        ctx.save();
+                        if (activeComponent === 'show-triangular-components') {
+                            ctx.strokeStyle = vec.color; ctx.globalAlpha = 0.8; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+                            ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(corner.x, start.y); ctx.stroke();
+                            ctx.beginPath(); ctx.moveTo(corner.x, start.y); ctx.lineTo(corner.x, end.y); ctx.stroke();
+                        } else if (activeComponent === 'show-rectangular-components') {
+                            ctx.strokeStyle = vec.color; ctx.globalAlpha = 0.5; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+                            ctx.beginPath(); ctx.moveTo(corner.x, corner.y); ctx.lineTo(end.x, end.y); ctx.stroke();
+                            ctx.beginPath(); ctx.moveTo(start.x, end.y); ctx.lineTo(corner.x, end.y); ctx.stroke();
+                        } else if (activeComponent === 'show-projection-components') {
+                             ctx.setLineDash([2, 3]); ctx.lineWidth = 1; ctx.globalAlpha = 0.5;
+                             ctx.strokeStyle = vec.color;
+                             ctx.beginPath(); ctx.moveTo(end.x, end.y); ctx.lineTo(end.x, origin.y); ctx.stroke();
+                             ctx.beginPath(); ctx.moveTo(end.x, end.y); ctx.lineTo(origin.x, end.y); ctx.stroke();
+                        }
+                        ctx.restore();
+                    });
+                }
             }
 
-            // Dibujar los vectores principales encima de la geometría
-            vectorsOnCanvas.forEach(v => drawVector(v));
-            if (showSumCheck.checked) drawVector(sumVector);
+            vectorsToProcess.forEach(vec => drawVector(vec));
 
-            // Dibujar anotaciones (magnitud y/o componentes)
             if (showCoordsOnCanvasCheck.checked) {
-                vectorsToProcess.forEach(vec => {
+                vectorsToProcess.forEach((vec, index) => {
                     drawVectorMagnitude(vec);
-                    if (activeComponent === 'show-rectangular-components' || activeComponent === 'show-triangular-components') {
-                         drawComponentAnnotations(vec);
+                    if (activeComponent === 'show-triangular-components' || activeComponent === 'show-rectangular-components') {
+                        drawComponentValueAnnotations(vec);
                     } else if (activeComponent === 'show-projection-components') {
-                        // Logic for projection annotations is inside its own block for now
+                        const pixelOffset = 14;
+                        const yPosForXComp = origin.y + pixelOffset * (index + 1);
+                        const xPosForYComp = origin.x - pixelOffset * (index + 1);
+                        const startX = worldToCanvas({x: vec.pos.x, y: 0});
+                        const endX = worldToCanvas({x: vec.pos.x + vec.value.x, y: 0});
+                        const startY = worldToCanvas({x: 0, y: vec.pos.y});
+                        const endY = worldToCanvas({x: 0, y: vec.pos.y + vec.value.y});
+                        
+                        ctx.save();
+                        ctx.strokeStyle = vec.color; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+                        drawArrow(startX.x, yPosForXComp, endX.x, yPosForXComp, vec.color);
+                        drawArrow(xPosForYComp, startY.y, xPosForYComp, endY.y, vec.color);
+                        ctx.restore();
+
+                        ctx.save();
+                        ctx.fillStyle = vec.color; ctx.font = 'bold 13px Inter';
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText(vec.value.x.toFixed(1), (startX.x + endX.x) / 2, yPosForXComp - 12);
+                        ctx.textAlign = 'right';
+                        ctx.fillText(vec.value.y.toFixed(1), xPosForYComp - 10, (startY.y + endY.y) / 2);
+                        ctx.restore();
                     }
                 });
             }
@@ -410,42 +409,58 @@
         }
         
         function updateStateFromCartesian() {
+            if (isUpdating) return;
+            isUpdating = true;
             vectorA.value.x = parseFloat(axInput.value) || 0;
             vectorA.value.y = parseFloat(ayInput.value) || 0;
             vectorB.value.x = parseFloat(bxInput.value) || 0;
             vectorB.value.y = parseFloat(byInput.value) || 0;
-            updateInputsFromState();
+            updatePolarInputsFromState();
             updateSumAndDraw();
+            isUpdating = false;
         }
 
         function updateStateFromPolar() {
+            if (isUpdating) return;
+            isUpdating = true;
             const rA = parseFloat(arInput.value) || 0;
             const thetaADeg = parseFloat(athetaInput.value) || 0;
             const thetaARad = thetaADeg * Math.PI / 180;
             vectorA.value.x = rA * Math.cos(thetaARad);
             vectorA.value.y = rA * Math.sin(thetaARad);
+
             const rB = parseFloat(brInput.value) || 0;
             const thetaBDeg = parseFloat(bthetaInput.value) || 0;
             const thetaBRad = thetaBDeg * Math.PI / 180;
             vectorB.value.x = rB * Math.cos(thetaBRad);
             vectorB.value.y = rB * Math.sin(thetaBRad);
-            updateInputsFromState();
+            updateCartesianInputsFromState();
             updateSumAndDraw();
+            isUpdating = false;
         }
 
-        function updateInputsFromState() {
+        function updateCartesianInputsFromState() {
             axInput.value = vectorA.value.x.toFixed(1);
             ayInput.value = vectorA.value.y.toFixed(1);
             bxInput.value = vectorB.value.x.toFixed(1);
             byInput.value = vectorB.value.y.toFixed(1);
+        }
+
+        function updatePolarInputsFromState() {
             const magA = Math.hypot(vectorA.value.x, vectorA.value.y);
             const angleADeg = (Math.atan2(vectorA.value.y, vectorA.value.x) * 180 / Math.PI);
             arInput.value = magA.toFixed(1);
             athetaInput.value = angleADeg.toFixed(0);
+
             const magB = Math.hypot(vectorB.value.x, vectorB.value.y);
             const angleBDeg = (Math.atan2(vectorB.value.y, vectorB.value.x) * 180 / Math.PI);
             brInput.value = magB.toFixed(1);
             bthetaInput.value = angleBDeg.toFixed(0);
+        }
+
+        function updateAllInputsFromState() {
+            updateCartesianInputsFromState();
+            updatePolarInputsFromState();
         }
         
         function updateSumAndDraw() {
@@ -463,7 +478,7 @@
             aPolarControls.classList.toggle('hidden', !isPolar);
             bCartesianControls.classList.toggle('hidden', isPolar);
             bPolarControls.classList.toggle('hidden', !isPolar);
-            updateInputsFromState();
+            updateAllInputsFromState();
             draw();
         }
 
@@ -554,7 +569,7 @@
         
         function init() {
             setCoordinateMode('cartesian');
-            updateInputsFromState();
+            updateAllInputsFromState();
             updateSumAndDraw();
             handleResize();
         }
