@@ -2,14 +2,17 @@
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Laboratorio 1D - Adición de Vectores</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            min-height: 100vh;
+        }
+        html, body {
+            height: 100vh;
+            overflow: hidden; 
         }
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
@@ -20,6 +23,7 @@
             border-radius: 0.25rem; width: 1em; height: 1em;
             display: inline-block; vertical-align: middle;
             position: relative; cursor: pointer;
+            flex-shrink: 0;
         }
         .form-checkbox:checked { background-color: #4fd1c5; border-color: #4fd1c5; }
         .form-checkbox:checked::after {
@@ -29,13 +33,13 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 flex flex-col">
+<body class="bg-gray-900 text-gray-200 h-screen">
 
-    <div class="w-full flex-grow flex flex-col">
+    <div class="w-full h-full flex flex-col md:flex-row">
         
-        <div id="canvas-container" class="relative w-full" style="height: 60vh; min-height: 350px;">
+        <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
-            <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex items-center space-x-2 text-xs backdrop-blur-sm border border-gray-700">
+            <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
             </div>
             <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
@@ -44,27 +48,9 @@
             </div>
         </div>
 
-        <div id="control-panel" class="bg-gray-900 p-4 w-full border-t-2 border-cyan-800" style="height: 40vh;">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto pb-8">
-
-                <div class="flex flex-col space-y-3">
-                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTA</h3>
-                    <!-- CAMBIO: Checkboxes desactivados por defecto -->
-                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
-                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
-                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
-                </div>
-
-                <div class="flex flex-col space-y-3">
-                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">CONTROLES</h3>
-                     <div class="flex space-x-2">
-                        <button id="orient-h" class="w-full text-xs bg-cyan-600 font-bold py-2 rounded-md transition-colors opacity-50" disabled>Horizontal</button>
-                        <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
-                     </div>
-                     <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
-                </div>
-
-                <div class="bg-gray-800/50 p-3 rounded-lg">
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none">
+            <div class="space-y-6 pb-6">
+                <div class="bg-gray-900/50 p-3 rounded-lg">
                     <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
                     <div class="space-y-3">
                         <div class="flex items-center justify-center">
@@ -87,26 +73,35 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="flex flex-col space-y-3">
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTA</h3>
+                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
+                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
+                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
+                </div>
+
+                <div class="flex flex-col space-y-3">
+                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">CONTROLES</h3>
+                     <div class="flex space-x-2">
+                         <button id="orient-h" class="w-full text-xs bg-cyan-600 font-bold py-2 rounded-md transition-colors opacity-50" disabled>Horizontal</button>
+                         <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
+                     </div>
+                     <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
+                </div>
+
+                <div class="pt-4 text-xs text-gray-500 text-center">
+                    Simulación creada por 
+                    <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
+                        AulaQuest
+                    </a>
+                </div>
             </div>
         </div>
     </div>
     
-    <footer class="bg-gray-900 p-4 w-full border-t border-gray-700 mt-auto">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-center md:text-left">
-            <div>
-                <a href="./index.html" class="text-cyan-400 hover:text-cyan-300 transition-colors">&larr; Volver al Menú Principal</a>
-            </div>
-            <div class="text-gray-500 md:text-right">
-                Simulación creada por 
-                <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
-                    AulaQuest
-                </a>
-            </div>
-        </div>
-    </footer>
-
-
     <script>
+    (function() {
         const canvas = document.getElementById('vectorCanvas');
         const ctx = canvas.getContext('2d');
         const canvasContainer = document.getElementById('canvas-container');
@@ -128,7 +123,7 @@
         let vectorsOnCanvas = [];
         let sumVector = { id: 's', value: 0, pos: { x: 0, y: 0 }, color: '#d946ef' };
         let selectedVector = null;
-        let draggingState = { item: null, type: null, isNew: false };
+        let draggingState = { item: null, type: null };
         let isPanning = false;
         let panStart = { x: 0, y: 0 };
 
@@ -136,11 +131,12 @@
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
 
-            // CAMBIO: Establecer zoom por defecto según la orientación
+            const isMobile = window.innerWidth < 768;
+            // CAMBIO: Valores de escala reducidos para un zoom más alejado
             if (orientation === 'vertical') {
-                scale = 25; // Más alejado para ver de -8 a 8 aprox.
+                scale = isMobile ? 15 : 20;
             } else {
-                scale = 40; // Zoom por defecto para horizontal
+                scale = isMobile ? 20 : 30;
             }
 
             origin = { x: canvas.width / 2, y: canvas.height / 2 };
@@ -178,8 +174,13 @@
             const textMetrics = ctx.measureText(text);
             const boxWidth = textMetrics.width + 16;
             const boxHeight = 24;
-            const boxX = x - boxWidth / 2;
-            const boxY = y - boxHeight - 5;
+            let boxX = x - boxWidth / 2;
+            let boxY = y - boxHeight - 5;
+
+            if (orientation === 'vertical') {
+                boxX = x + 10;
+                boxY = y - boxHeight / 2;
+            }
 
             ctx.fillStyle = '#fefce8';
             ctx.strokeStyle = color;
@@ -192,7 +193,7 @@
             ctx.fillStyle = '#1e293b';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(text, x, boxY + boxHeight / 2);
+            ctx.fillText(text, boxX + boxWidth / 2, boxY + boxHeight / 2);
         }
 
         function drawGrid() {
@@ -201,7 +202,13 @@
             for (let x = origin.x % scale; x < canvas.width; x += scale) {
                 ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
             }
+             for (let x = (origin.x % scale) - scale; x >= 0; x -= scale) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
             for (let y = origin.y % scale; y < canvas.height; y += scale) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+            for (let y = (origin.y % scale) - scale; y >= 0; y -= scale) {
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
             }
         }
@@ -223,30 +230,26 @@
             ctx.fill();
 
             ctx.font = '10px Inter';
-            ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
+            const step = scale > 35 ? 1 : (scale > 15 ? 2 : 5);
             if (orientation === 'horizontal') {
-                const maxTicks = Math.floor((canvas.width - origin.x) / scale);
-                const minTicks = Math.floor(origin.x / scale);
-                for (let i = 1; i <= maxTicks; i++) {
+                ctx.textAlign = 'center';
+                const startWorldX = Math.floor(-origin.x / scale / step) * step;
+                const endWorldX = Math.ceil((canvas.width - origin.x) / scale / step) * step;
+                for (let i = startWorldX; i <= endWorldX; i += step) {
+                    if (i === 0) continue;
                     const x = origin.x + i * scale;
-                    if (x < canvas.width - 15) ctx.fillText(i, x, origin.y + 15);
-                }
-                for (let i = -1; i >= -minTicks; i--) {
-                    const x = origin.x + i * scale;
-                    if (x > 15) ctx.fillText(i, x, origin.y + 15);
+                    if (x > 15 && x < canvas.width - 15) ctx.fillText(i, x, origin.y + 15);
                 }
             } else {
-                 const maxTicks = Math.floor(origin.y / scale);
-                 const minTicks = Math.floor((canvas.height - origin.y) / scale);
-                 for (let i = 1; i <= maxTicks; i++) {
+                ctx.textAlign = 'right';
+                const startWorldY = Math.floor(-(canvas.height - origin.y) / scale / step) * step;
+                const endWorldY = Math.ceil(origin.y / scale / step) * step;
+                for (let i = startWorldY; i <= endWorldY; i += step) {
+                    if (i === 0) continue;
                     const y = origin.y - i * scale;
-                    if (y > 15) ctx.fillText(i, origin.x - 15, y);
-                }
-                 for (let i = -1; i >= -minTicks; i--) {
-                    const y = origin.y - i * scale;
-                    if (y < canvas.height - 15) ctx.fillText(i, origin.x - 15, y);
+                    if (y > 15 && y < canvas.height - 15) ctx.fillText(i, origin.x - 15, y);
                 }
             }
         }
@@ -256,13 +259,8 @@
             const end = getVectorEnd(vec);
 
             if (vec === selectedVector) {
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 8;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-                ctx.stroke();
+                ctx.strokeStyle = 'white'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(end.x, end.y); ctx.stroke();
                 ctx.lineCap = 'butt';
             }
 
@@ -274,13 +272,8 @@
             ctx.stroke();
 
             if (!isSum) {
-                ctx.fillStyle = vec.color;
-                ctx.strokeStyle = '#1a202c';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(start.x, start.y, 4, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.stroke();
+                ctx.fillStyle = vec.color; ctx.strokeStyle = '#1a202c'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(start.x, start.y, 4, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
             }
 
             ctx.fillStyle = vec.color;
@@ -295,7 +288,7 @@
 
             if (showValuesCheck.checked) {
                 const text = isSum ? `|s| = ${Math.abs(vec.value).toFixed(1)}` : `|${vec.id}| = ${Math.abs(vec.value).toFixed(1)}`;
-                drawValueBox(text, (start.x + end.x) / 2, (start.y + end.y) / 2 - 10, vec.color);
+                drawValueBox(text, (start.x + end.x) / 2, (start.y + end.y) / 2, vec.color);
             }
         }
         
@@ -305,15 +298,15 @@
                 const mag = Math.abs(vec.value).toFixed(1);
                 const componentX = (orientation === 'horizontal' ? vec.value : 0).toFixed(1);
                 const componentY = (orientation === 'vertical' ? vec.value : 0).toFixed(1);
-                const vecId = vec.id;
+                const vecId = vec.id.toUpperCase();
                 
                 componentDisplay.innerHTML = `
-                    <span class="font-bold" style="color: ${vec.color};">|${vecId}|</span>
-                    <input type="text" readonly value="${mag}" class="w-12 text-center bg-gray-700 rounded border border-gray-600 text-white text-xs">
-                    <span class="font-bold text-gray-400">${vecId}<sub>x</sub></span>
-                    <input type="text" readonly value="${componentX}" class="w-12 text-center bg-gray-700 rounded border border-gray-600 text-white text-xs">
-                    <span class="font-bold text-gray-400">${vecId}<sub>y</sub></span>
-                    <input type="text" readonly value="${componentY}" class="w-12 text-center bg-gray-700 rounded border border-gray-600 text-white text-xs">
+                    <span class="font-bold" style="color: ${vec.color};">|${vecId}|:</span>
+                    <span class="w-10 text-center">${mag}</span>
+                    <span class="font-bold text-gray-400 ml-2">${vecId}<sub>x</sub>:</span>
+                    <span class="w-10 text-center">${componentX}</span>
+                    <span class="font-bold text-gray-400 ml-2">${vecId}<sub>y</sub>:</span>
+                    <span class="w-10 text-center">${componentY}</span>
                 `;
                 componentDisplay.classList.remove('hidden');
             } else {
@@ -334,31 +327,31 @@
             return { x: clientX - rect.left, y: clientY - rect.top };
         }
         
-        sourceVectors.forEach(el => {
-            el.addEventListener('mousedown', (e) => {
-                if (el.classList.contains('disabled')) return;
-                e.preventDefault();
-                
-                const id = el.dataset.id;
-                const baseValue = parseFloat(el.dataset.value);
-                
-                const newVector = {
-                    id: id,
-                    value: baseValue,
-                    color: el.dataset.color,
-                    pos: { x: origin.x - (baseValue * scale / 2), y: origin.y - 60 + (vectorsOnCanvas.length * 20) }
-                };
-                
-                vectorsOnCanvas.push(newVector);
-                selectedVector = newVector;
-                draggingState = { item: newVector, type: 'body', isNew: false };
-                el.classList.add('disabled');
-                
-                draw();
-            });
-        });
+        function handleDragStart(e) {
+            if (e.currentTarget.classList.contains('disabled')) return;
+            e.preventDefault();
+            
+            const el = e.currentTarget;
+            const id = el.dataset.id;
+            const baseValue = parseFloat(el.dataset.value);
+            
+            const newVector = {
+                id: id,
+                value: baseValue,
+                color: el.dataset.color,
+                pos: { x: origin.x, y: origin.y - 60 + (vectorsOnCanvas.length * 20) }
+            };
+            
+            vectorsOnCanvas.push(newVector);
+            selectedVector = newVector;
+            draggingState = { item: newVector, type: 'body' };
+            el.classList.add('disabled');
+            
+            draw();
+        }
 
-        canvas.addEventListener('mousedown', (e) => {
+        function handleMouseDown(e) {
+            if (e.type === 'touchstart') e.preventDefault();
             const pos = getMousePos(e);
             let clickedOnItem = null;
 
@@ -389,27 +382,10 @@
             }
             
             draw();
-        });
-
-        function isClickOnVector(pos, vec) {
-            const start = vec.pos;
-            const end = getVectorEnd(vec);
-            const buffer = 8;
-            const bodyRect = {
-                x: Math.min(start.x, end.x) - buffer, y: Math.min(start.y, end.y) - buffer,
-                w: Math.abs(start.x - end.x) + 2 * buffer, h: Math.abs(start.y - end.y) + 2 * buffer
-            };
-            return pos.x > bodyRect.x && pos.x < bodyRect.x + bodyRect.w && pos.y > bodyRect.y && pos.y < bodyRect.y + bodyRect.h;
         }
 
-        function getVectorEnd(vec) {
-            const end = { ...vec.pos };
-            if (orientation === 'horizontal') end.x += vec.value * scale;
-            else end.y -= vec.value * scale;
-            return end;
-        }
-
-        window.addEventListener('mousemove', (e) => {
+        function handleMouseMove(e) {
+            if (e.type === 'touchmove') e.preventDefault();
             const pos = getMousePos(e);
             let cursorSet = false;
             
@@ -427,7 +403,7 @@
             }
 
             if (!draggingState.item) {
-                 const allDrawableVectors = [...vectorsOnCanvas];
+                const allDrawableVectors = [...vectorsOnCanvas];
                 if (showSumCheck.checked && vectorsOnCanvas.length > 0) allDrawableVectors.push(sumVector);
 
                 for (const v of allDrawableVectors) {
@@ -458,18 +434,32 @@
                 }
                 draw();
             }
-        });
+        }
 
-        window.addEventListener('mouseup', () => {
-            draggingState = { item: null, type: null, isNew: false };
+        function handleMouseUp() {
+            draggingState = { item: null, type: null };
             isPanning = false;
             canvasContainer.classList.remove('grabbing');
             draw();
-        });
+        }
 
-        [showSumCheck, showValuesCheck, showGridCheck].forEach(el => el.addEventListener('change', draw));
-        
-        resetBtn.addEventListener('click', init);
+        function isClickOnVector(pos, vec) {
+            const start = vec.pos;
+            const end = getVectorEnd(vec);
+            const buffer = 8;
+            const bodyRect = {
+                x: Math.min(start.x, end.x) - buffer, y: Math.min(start.y, end.y) - buffer,
+                w: Math.abs(start.x - end.x) + 2 * buffer, h: Math.abs(start.y - end.y) + 2 * buffer
+            };
+            return pos.x > bodyRect.x && pos.x < bodyRect.x + bodyRect.w && pos.y > bodyRect.y && pos.y < bodyRect.y + bodyRect.h;
+        }
+
+        function getVectorEnd(vec) {
+            const end = { ...vec.pos };
+            if (orientation === 'horizontal') end.x += vec.value * scale;
+            else end.y -= vec.value * scale;
+            return end;
+        }
 
         const switchOrientation = (newOrientation) => {
             orientation = newOrientation;
@@ -484,6 +474,25 @@
             orientHBtn.classList.toggle('bg-gray-600', !isHorizontal);
             init();
         };
+
+        // --- EVENT LISTENERS ---
+        sourceVectors.forEach(el => {
+            el.addEventListener('mousedown', handleDragStart);
+            el.addEventListener('touchstart', handleDragStart, { passive: false });
+        });
+
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
+        
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('touchmove', handleMouseMove, { passive: false });
+
+        window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('touchend', handleMouseUp);
+
+        [showSumCheck, showValuesCheck, showGridCheck].forEach(el => el.addEventListener('change', draw));
+        
+        resetBtn.addEventListener('click', init);
         orientHBtn.addEventListener('click', () => switchOrientation('horizontal'));
         orientVBtn.addEventListener('click', () => switchOrientation('vertical'));
         
@@ -492,6 +501,7 @@
 
         window.addEventListener('resize', init);
         init();
+    })();
     </script>
 </body>
 </html>
