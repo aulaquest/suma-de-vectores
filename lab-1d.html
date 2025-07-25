@@ -2,6 +2,7 @@
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
+    <!-- Viewport actualizado para mejor control en móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Laboratorio 1D - Adición de Vectores</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -10,10 +11,9 @@
         body { 
             font-family: 'Inter', sans-serif; 
         }
-        /* Clave: Evitar el scroll en la página completa */
+        /* Se elimina el overflow:hidden de body para permitir el layout flexible en móvil */
         html, body {
-            height: 100vh;
-            overflow: hidden; 
+            height: 100%; /* Usamos 100% para que se ajuste al contenedor principal h-screen */
         }
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
@@ -34,14 +34,22 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 h-screen">
+<body class="bg-gray-900 text-gray-200">
 
-    <!-- Contenedor principal con Flexbox -->
-    <div class="w-full h-full flex flex-col md:flex-row min-h-0">
+    <!-- 
+      Contenedor principal con Flexbox.
+      - Por defecto (móvil): flex-col (elementos apilados verticalmente).
+      - En pantallas medianas y grandes (md:): flex-row (elementos uno al lado del otro).
+      - h-screen asegura que ocupe toda la altura de la pantalla.
+    -->
+    <div class="w-full h-screen flex flex-col md:flex-row">
         
-        <!-- Contenedor del Canvas (CORREGIDO) -->
-        <!-- Se añade 'flex-shrink-0' para evitar que se encoja. Mantiene su altura del 60% en móvil. -->
-        <div id="canvas-container" class="relative h-[60%] flex-shrink-0 md:h-full md:w-[75%]">
+        <!-- 
+          Contenedor del Canvas.
+          - Móvil (por defecto): Ocupa el 60% de la altura de la pantalla (h-[60vh]) y todo el ancho (w-full).
+          - Escritorio (md:): Ocupa el 75% del ancho (md:w-[75%]) y toda la altura disponible (md:h-full).
+        -->
+        <div id="canvas-container" class="relative w-full h-[60vh] md:w-[75%] md:h-full">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -52,10 +60,14 @@
             </div>
         </div>
 
-        <!-- Panel de Control (CORREGIDO) -->
-        <!-- Se reemplaza 'h-[40%]' por 'flex-1'. Ahora el panel ocupa el espacio sobrante, lo que permite que el div interno con 'overflow-y-auto' funcione correctamente. -->
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 md:h-full flex flex-col min-h-0">
-            <!-- Div interno para el scroll. Funciona gracias a que su padre ahora tiene una altura flexible y definida. -->
+        <!-- 
+          Panel de Control.
+          - Móvil (por defecto): Ocupa el espacio restante (flex-1), tiene un borde superior.
+          - Escritorio (md:): Ocupa el espacio restante (md:flex-1), tiene un borde izquierdo.
+          - min-h-0 es clave para que el scroll interno funcione correctamente en un contenedor flex.
+        -->
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 flex flex-col min-h-0">
+            <!-- Div interno para el scroll. Ocupa todo el espacio de su padre (flex-1) y permite scroll vertical. -->
             <div class="flex-1 overflow-y-auto pb-6">
                 <div class="space-y-6">
                     <div class="bg-gray-900/50 p-3 rounded-lg">
@@ -83,7 +95,7 @@
                     </div>
 
                     <div class="flex flex-col space-y-3">
-                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS</h3>
+                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS9</h3>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
@@ -112,7 +124,6 @@
     
     <script>
     (function() {
-        // El código Javascript no necesita cambios, el problema era de maquetación (HTML/CSS).
         const canvas = document.getElementById('vectorCanvas');
         const ctx = canvas.getContext('2d');
         const canvasContainer = document.getElementById('canvas-container');
@@ -139,14 +150,14 @@
         let panStart = { x: 0, y: 0 };
 
         function init() {
+            // El canvas siempre se ajustará al tamaño de su contenedor, que ahora es responsivo.
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
 
-            const isMobile = window.innerWidth < 768;
             if (orientation === 'vertical') {
-                scale = isMobile ? 15 : 20;
+                scale = 20;
             } else {
-                scale = isMobile ? 20 : 30;
+                scale = 30;
             }
 
             origin = { x: canvas.width / 2, y: canvas.height / 2 };
