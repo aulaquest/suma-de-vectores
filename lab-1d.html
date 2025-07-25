@@ -57,13 +57,14 @@
             </div>
         </div>
 
-        <!--  
+        <!--   
           Panel de Control (LA MAGIA ESTÁ AQUÍ):
           - 'flex-1': Ocupa el espacio que sobra (el 40% en móvil).
           - 'min-h-0': Permite que el panel se encoja si es necesario.
           - 'overflow-y-auto': AÑADE EL SCROLL AUTOMÁTICO cuando el contenido se desborda.
+          - 'h-full': Asegura que el panel ocupe toda la altura disponible en el layout flex.
         -->
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none">
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none h-full">
             <!-- El contenedor interno asegura un padding al final del scroll -->
             <div class="space-y-6 pb-6">
                 <div class="bg-gray-900/50 p-3 rounded-lg">
@@ -98,13 +99,13 @@
                 </div>
 
                 <div class="flex flex-col space-y-3">
-                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">CONTROLES</h3>
-                     <div class="flex space-x-2">
-                         <button id="orient-h" class="w-full text-xs bg-cyan-600 font-bold py-2 rounded-md transition-colors opacity-50" disabled>Horizontal</button>
-                         <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
-                     </div>
-                     <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
-                     <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">CONTROLES</h3>
+                    <div class="flex space-x-2">
+                        <button id="orient-h" class="w-full text-xs bg-cyan-600 font-bold py-2 rounded-md transition-colors opacity-50" disabled>Horizontal</button>
+                        <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
+                    </div>
+                    <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
+                    <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
                 </div>
 
                 <div class="pt-4 text-xs text-gray-500 text-center">
