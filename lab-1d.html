@@ -10,7 +10,14 @@
         body { 
             font-family: 'Inter', sans-serif; 
         }
-        /* Se elimina la regla de altura en html, body para evitar conflictos con h-screen y flexbox en móvil */
+        /* CORRECCIÓN CLAVE 1:
+          Se reestablecen los estilos del body y html para crear un contenedor de página completa
+          que no se desplaza, igual que en el ejemplo que funciona.
+        */
+        html, body {
+            height: 100vh;
+            overflow: hidden; 
+        }
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
         .source-vector.disabled { opacity: 0.4; cursor: not-allowed; }
@@ -30,41 +37,34 @@
         }
     </style>
 </head>
-<!-- 
-  CAMBIO CLAVE: El body es ahora el contenedor flex principal.
-  - Ocupa toda la pantalla (h-screen).
-  - Apila los elementos verticalmente en móvil (flex-col) y horizontalmente en escritorio (md:flex-row).
-  - Esto crea un contexto de layout más estable para los hijos.
--->
-<body class="bg-gray-900 text-gray-200 h-screen flex flex-col md:flex-row">
+<body class="bg-gray-900 text-gray-200">
 
-    <!-- 
-      Contenedor del Canvas.
-      - Móvil: Ocupa el 60% de la altura del body (h-[60%]).
-      - Escritorio: Ocupa el 75% del ancho y la altura completa (md:w-[75%] md:h-full).
-    -->
-    <div id="canvas-container" class="relative w-full h-[60%] md:w-[75%] md:h-full">
-        <canvas id="vectorCanvas"></canvas>
-        <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
-            <!-- Contenido dinámico aquí -->
+    <!-- Contenedor principal que ocupa toda la altura (h-full) del body (que es 100vh) -->
+    <div class="w-full h-full flex flex-col md:flex-row">
+        
+        <!-- Contenedor del Canvas -->
+        <div id="canvas-container" class="relative w-full h-[60%] md:h-full md:w-[75%]">
+            <canvas id="vectorCanvas"></canvas>
+            <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
+                <!-- Contenido dinámico aquí -->
+            </div>
+            <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
+                <button id="zoom-in-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">+</button>
+                <button id="zoom-out-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">-</button>
+            </div>
         </div>
-        <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
-            <button id="zoom-in-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">+</button>
-            <button id="zoom-out-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">-</button>
-        </div>
-    </div>
 
-    <!-- 
-      Panel de Control.
-      - flex-1 hace que ocupe el espacio restante (40% en móvil).
-      - flex y flex-col junto con min-h-0 son la clave para que el hijo con overflow-y-auto funcione.
-    -->
-    <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 flex flex-col min-h-0">
-        <!-- Este div interno es el que ahora se desplazará correctamente. -->
-        <div class="flex-1 overflow-y-auto pb-6">
-            <div class="space-y-6">
+        <!-- 
+          CORRECCIÓN CLAVE 2:
+          Se simplifica el panel de control. Ahora es UN SOLO div que contiene el scroll.
+          - flex-1: Ocupa el 40% de espacio restante en móvil.
+          - min-h-0: Esencial para que el overflow funcione en un item flex.
+          - overflow-y-auto: Habilita el scroll vertical cuando el contenido es más alto que el panel.
+        -->
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto">
+            <div class="space-y-6 pb-6">
                 <div class="bg-gray-900/50 p-3 rounded-lg">
-                    <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
+                    <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector11</h3>
                     <div class="space-y-3">
                         <div class="flex items-center justify-center">
                             <div class="source-vector p-2 rounded-md cursor-grab" data-id="a" data-color="#48bb78" data-value="5">
