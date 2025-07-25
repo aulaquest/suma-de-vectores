@@ -10,6 +10,7 @@
         body { 
             font-family: 'Inter', sans-serif; 
         }
+        /* Clave: Evitar el scroll en la página completa */
         html, body {
             height: 100vh;
             overflow: hidden; 
@@ -36,18 +37,15 @@
 <body class="bg-gray-900 text-gray-200 h-screen">
 
     <!-- 
-      MODIFICACIÓN PRINCIPAL:
-      - Se ha cambiado el layout de CSS Grid a Flexbox para un mejor control del scroll en móvil.
-      - 'flex flex-col' para la vista móvil (elementos apilados verticalmente).
-      - 'md:flex-row' para la vista de escritorio (elementos uno al lado del otro).
+      NUEVA ESTRUCTURA (A PRUEBA DE FALLOS):
+      - Se usa Flexbox, que es ideal para este tipo de layout.
+      - 'flex flex-col' apila el canvas y el panel en vertical para móviles.
+      - 'md:flex-row' los pone uno al lado del otro en pantallas grandes.
     -->
     <div class="w-full h-full flex flex-col md:flex-row">
         
-        <!-- 
-          Contenedor del Canvas:
-          - Se define una altura del 60% en móvil ('h-[60%]') y del 100% en escritorio ('md:h-full').
-          - Se define un ancho del 75% en escritorio ('md:w-[75%]').
-        -->
+        <!-- Contenedor del Canvas -->
+        <!-- Ocupa el 60% de la altura en móvil y el 75% del ancho en escritorio. -->
         <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
@@ -60,13 +58,13 @@
         </div>
 
         <!--  
-          Panel de Control:
-          - 'flex-1': Hace que el panel ocupe el espacio restante (el 40% en móvil).
-          - 'min-h-0': CLAVE. Permite que el panel se encoja y respete la altura definida por flex-1.
-          - 'overflow-y-auto': Añade el scroll vertical cuando el contenido excede la altura del panel.
-          - 'md:w-[25%]' y 'md:flex-none' para el ancho fijo en escritorio.
+          Panel de Control (LA MAGIA ESTÁ AQUÍ):
+          - 'flex-1': Ocupa el espacio que sobra (el 40% en móvil).
+          - 'min-h-0': Permite que el panel se encoja si es necesario.
+          - 'overflow-y-auto': AÑADE EL SCROLL AUTOMÁTICO cuando el contenido se desborda.
         -->
         <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none">
+            <!-- El contenedor interno asegura un padding al final del scroll -->
             <div class="space-y-6 pb-6">
                 <div class="bg-gray-900/50 p-3 rounded-lg">
                     <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
@@ -93,7 +91,7 @@
                 </div>
 
                 <div class="flex flex-col space-y-3">
-                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS</h3>
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS2</h3>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
@@ -121,6 +119,8 @@
     
     <script>
     (function() {
+        // El código Javascript no necesita cambios, ya que el problema era de maquetación (HTML/CSS).
+        // Se mantiene toda la lógica de la simulación.
         const canvas = document.getElementById('vectorCanvas');
         const ctx = canvas.getContext('2d');
         const canvasContainer = document.getElementById('canvas-container');
@@ -147,7 +147,6 @@
         let panStart = { x: 0, y: 0 };
 
         function init() {
-            // El canvas debe ajustarse a su contenedor, que ahora es un elemento flex.
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
 
@@ -167,6 +166,7 @@
         }
 
         function draw() {
+            if (canvas.width <= 0 || canvas.height <= 0) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#1a202c';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -520,6 +520,7 @@
 
         window.addEventListener('resize', init);
         
+        // Carga inicial
         init();
     })();
     </script>
