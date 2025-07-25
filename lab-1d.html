@@ -2,7 +2,6 @@
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport actualizado para mejor control en móviles -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Laboratorio 1D - Adición de Vectores</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,10 +10,7 @@
         body { 
             font-family: 'Inter', sans-serif; 
         }
-        /* Se elimina el overflow:hidden de body para permitir el layout flexible en móvil */
-        html, body {
-            height: 100%; /* Usamos 100% para que se ajuste al contenedor principal h-screen */
-        }
+        /* Se elimina la regla de altura en html, body para evitar conflictos con h-screen y flexbox en móvil */
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
         .source-vector.disabled { opacity: 0.4; cursor: not-allowed; }
@@ -34,89 +30,85 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200">
+<!-- 
+  CAMBIO CLAVE: El body es ahora el contenedor flex principal.
+  - Ocupa toda la pantalla (h-screen).
+  - Apila los elementos verticalmente en móvil (flex-col) y horizontalmente en escritorio (md:flex-row).
+  - Esto crea un contexto de layout más estable para los hijos.
+-->
+<body class="bg-gray-900 text-gray-200 h-screen flex flex-col md:flex-row">
 
     <!-- 
-      Contenedor principal con Flexbox.
-      - Por defecto (móvil): flex-col (elementos apilados verticalmente).
-      - En pantallas medianas y grandes (md:): flex-row (elementos uno al lado del otro).
-      - h-screen asegura que ocupe toda la altura de la pantalla.
+      Contenedor del Canvas.
+      - Móvil: Ocupa el 60% de la altura del body (h-[60%]).
+      - Escritorio: Ocupa el 75% del ancho y la altura completa (md:w-[75%] md:h-full).
     -->
-    <div class="w-full h-screen flex flex-col md:flex-row">
-        
-        <!-- 
-          Contenedor del Canvas.
-          - Móvil (por defecto): Ocupa el 60% de la altura de la pantalla (h-[60vh]) y todo el ancho (w-full).
-          - Escritorio (md:): Ocupa el 75% del ancho (md:w-[75%]) y toda la altura disponible (md:h-full).
-        -->
-        <div id="canvas-container" class="relative w-full h-[60vh] md:w-[75%] md:h-full">
-            <canvas id="vectorCanvas"></canvas>
-            <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
-                <!-- Contenido dinámico aquí -->
-            </div>
-            <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
-                <button id="zoom-in-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">+</button>
-                <button id="zoom-out-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">-</button>
-            </div>
+    <div id="canvas-container" class="relative w-full h-[60%] md:w-[75%] md:h-full">
+        <canvas id="vectorCanvas"></canvas>
+        <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
+            <!-- Contenido dinámico aquí -->
         </div>
+        <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
+            <button id="zoom-in-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">+</button>
+            <button id="zoom-out-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">-</button>
+        </div>
+    </div>
 
-        <!-- 
-          Panel de Control.
-          - Móvil (por defecto): Ocupa el espacio restante (flex-1), tiene un borde superior.
-          - Escritorio (md:): Ocupa el espacio restante (md:flex-1), tiene un borde izquierdo.
-          - min-h-0 es clave para que el scroll interno funcione correctamente en un contenedor flex.
-        -->
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 flex flex-col min-h-0">
-            <!-- Div interno para el scroll. Ocupa todo el espacio de su padre (flex-1) y permite scroll vertical. -->
-            <div class="flex-1 overflow-y-auto pb-6">
-                <div class="space-y-6">
-                    <div class="bg-gray-900/50 p-3 rounded-lg">
-                        <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-center">
-                                <div class="source-vector p-2 rounded-md cursor-grab" data-id="a" data-color="#48bb78" data-value="5">
-                                    <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#48bb78" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#48bb78"/></svg>
-                                </div>
-                                <span class="font-bold text-sm text-green-400 ml-4">Vector a</span>
+    <!-- 
+      Panel de Control.
+      - flex-1 hace que ocupe el espacio restante (40% en móvil).
+      - flex y flex-col junto con min-h-0 son la clave para que el hijo con overflow-y-auto funcione.
+    -->
+    <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 flex flex-col min-h-0">
+        <!-- Este div interno es el que ahora se desplazará correctamente. -->
+        <div class="flex-1 overflow-y-auto pb-6">
+            <div class="space-y-6">
+                <div class="bg-gray-900/50 p-3 rounded-lg">
+                    <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-center">
+                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="a" data-color="#48bb78" data-value="5">
+                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#48bb78" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#48bb78"/></svg>
                             </div>
-                            <div class="flex items-center justify-center">
-                                <div class="source-vector p-2 rounded-md cursor-grab" data-id="b" data-color="#4299e1" data-value="3">
-                                    <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#4299e1" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#4299e1"/></svg>
-                                </div>
-                                <span class="font-bold text-sm text-blue-400 ml-4">Vector b</span>
+                            <span class="font-bold text-sm text-green-400 ml-4">Vector a</span>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="b" data-color="#4299e1" data-value="3">
+                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#4299e1" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#4299e1"/></svg>
                             </div>
-                            <div class="flex items-center justify-center">
-                                <div class="source-vector p-2 rounded-md cursor-grab" data-id="c" data-color="#f59e0b" data-value="2">
-                                    <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#f59e0b" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#f59e0b"/></svg>
-                                </div>
-                                <span class="font-bold text-sm text-yellow-400 ml-4">Vector c</span>
+                            <span class="font-bold text-sm text-blue-400 ml-4">Vector b</span>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="c" data-color="#f59e0b" data-value="2">
+                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#f59e0b" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#f59e0b"/></svg>
                             </div>
+                            <span class="font-bold text-sm text-yellow-400 ml-4">Vector c</span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="flex flex-col space-y-3">
-                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS9</h3>
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
-                    </div>
+                <div class="flex flex-col space-y-3">
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS</h3>
+                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
+                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
+                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
+                </div>
 
-                    <div class="flex flex-col space-y-3">
-                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">CONTROLES</h3>
-                        <div class="flex space-x-2">
-                            <button id="orient-h" class="w-full text-xs bg-cyan-600 font-bold py-2 rounded-md transition-colors opacity-50" disabled>Horizontal</button>
-                            <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
-                        </div>
-                        <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
-                        <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
+                <div class="flex flex-col space-y-3">
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">CONTROLES</h3>
+                    <div class="flex space-x-2">
+                        <button id="orient-h" class="w-full text-xs bg-cyan-600 font-bold py-2 rounded-md transition-colors opacity-50" disabled>Horizontal</button>
+                        <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
                     </div>
+                    <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
+                    <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
+                </div>
 
-                    <div class="pt-4 text-xs text-gray-500 text-center">
-                        Simulación creada por 
-                        <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
-                            AulaQuest
-                        </a>
-                    </div>
+                <div class="pt-4 text-xs text-gray-500 text-center">
+                    Simulación creada por 
+                    <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
+                        AulaQuest
+                    </a>
                 </div>
             </div>
         </div>
@@ -150,7 +142,6 @@
         let panStart = { x: 0, y: 0 };
 
         function init() {
-            // El canvas siempre se ajustará al tamaño de su contenedor, que ahora es responsivo.
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
 
