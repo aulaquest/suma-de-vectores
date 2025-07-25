@@ -10,8 +10,15 @@
         body { 
             font-family: 'Inter', sans-serif; 
         }
-        html, body {
-            height: 100vh; /* Ocupa el 100% de la altura de la ventana */
+        /* ESTRUCTURA A PRUEBA DE BALAS:
+           - Se usa height: 100% en lugar de 100vh para máxima compatibilidad con móviles.
+           - El body se convierte en el contenedor flex principal.
+        */
+        html {
+            height: 100%;
+        }
+        body {
+            height: 100%;
             overflow: hidden; /* Evita el scroll en la página principal */
         }
         #canvas-container { cursor: grab; }
@@ -33,87 +40,85 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 h-screen">
+<!-- 
+  CAMBIO ESTRUCTURAL:
+  - Se quita el div contenedor. El BODY es ahora el contenedor flex.
+  - Se quita h-screen porque la altura se controla desde el CSS.
+  - Por defecto es 'flex-col' (móvil) y en 'md' pasa a 'flex-row' (escritorio).
+-->
+<body class="bg-gray-900 text-gray-200 flex flex-col md:flex-row">
 
     <!-- 
-      Contenedor principal:
-      - Por defecto es 'flex-col' (vista móvil, un elemento encima de otro).
-      - A partir del breakpoint 'md' (768px), cambia a 'flex-row' (vista escritorio, un elemento al lado del otro).
+      Contenedor del Canvas:
+      - En móvil, ocupa el 60% de la altura ('h-[60%]') y todo el ancho ('w-full').
+      - En escritorio ('md:'), ocupa el 100% de la altura y el 75% del ancho.
     -->
-    <div class="w-full h-full flex flex-col md:flex-row">
-        
-        <!-- 
-          Contenedor del Canvas:
-          - En móvil (por defecto), ocupa el 60% de la altura ('h-[60%]').
-          - En escritorio ('md:'), ocupa el 100% de la altura y el 75% del ancho.
-        -->
-        <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
-            <canvas id="vectorCanvas"></canvas>
-            <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
-                <!-- Contenido dinámico aquí -->
-            </div>
-            <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
-                <button id="zoom-in-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">+</button>
-                <button id="zoom-out-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">-</button>
-            </div>
+    <div id="canvas-container" class="relative h-[60%] md:h-full w-full md:w-[75%]">
+        <canvas id="vectorCanvas"></canvas>
+        <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
+            <!-- Contenido dinámico aquí -->
         </div>
+        <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
+            <button id="zoom-in-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">+</button>
+            <button id="zoom-out-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">-</button>
+        </div>
+    </div>
 
-        <!--  
-          Panel de Control:
-          - En móvil (por defecto), 'flex-1' hace que ocupe el espacio restante (40%).
-          - 'min-h-0' es clave para que 'overflow-y-auto' funcione correctamente en un contenedor flex.
-          - 'overflow-y-auto' crea el scroll interno SOLO cuando es necesario.
-          - En escritorio ('md:'), pasa a tener un ancho del 25% y se comporta como una columna lateral.
-        -->
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none">
-            <div class="space-y-6 pb-6">
-                <div class="bg-gray-900/50 p-3 rounded-lg">
-                    <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-center">
-                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="a" data-color="#48bb78" data-value="5">
-                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#48bb78" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#48bb78"/></svg>
-                            </div>
-                            <span class="font-bold text-sm text-green-400 ml-4">Vector a</span>
+    <!--  
+      Panel de Control:
+      - 'flex-1 min-h-0' fuerza al panel a ocupar el espacio restante y permite que el overflow funcione.
+      - 'overflow-y-auto' crea el scroll interno.
+    -->
+    <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full md:w-[25%] flex-1 min-h-0 overflow-y-auto">
+        <div class="space-y-6 pb-6">
+            <div class="bg-gray-900/50 p-3 rounded-lg">
+                <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-center">
+                        <div class="source-vector p-2 rounded-md cursor-grab" data-id="a" data-color="#48bb78" data-value="5">
+                            <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#48bb78" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#48bb78"/></svg>
                         </div>
-                        <div class="flex items-center justify-center">
-                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="b" data-color="#4299e1" data-value="3">
-                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#4299e1" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#4299e1"/></svg>
-                            </div>
-                            <span class="font-bold text-sm text-blue-400 ml-4">Vector b</span>
+                        <span class="font-bold text-sm text-green-400 ml-4">Vector a</span>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <div class="source-vector p-2 rounded-md cursor-grab" data-id="b" data-color="#4299e1" data-value="3">
+                            <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#4299e1" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#4299e1"/></svg>
                         </div>
-                        <div class="flex items-center justify-center">
-                            <div class="source-vector p-2 rounded-md cursor-grab" data-id="c" data-color="#f59e0b" data-value="2">
-                                <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#f59e0b" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#f59e0b"/></svg>
-                            </div>
-                            <span class="font-bold text-sm text-yellow-400 ml-4">Vector c</span>
+                        <span class="font-bold text-sm text-blue-400 ml-4">Vector b</span>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <div class="source-vector p-2 rounded-md cursor-grab" data-id="c" data-color="#f59e0b" data-value="2">
+                            <svg width="50" height="15" viewBox="0 0 50 15"><line x1="0" y1="7.5" x2="40" y2="7.5" stroke="#f59e0b" stroke-width="4"/><polygon points="38,1.5 50,7.5 38,13.5" fill="#f59e0b"/></svg>
                         </div>
+                        <span class="font-bold text-sm text-yellow-400 ml-4">Vector c</span>
                     </div>
                 </div>
+            </div>
 
-                <div class="flex flex-col space-y-3">
-                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTA</h3>
-                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
-                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
-                    <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
-                </div>
+            <div class="flex flex-col space-y-3">
+                <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTA</h3>
+                <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
+                <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
+                <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
+            </div>
 
-                <div class="flex flex-col space-y-3">
-                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">CONTROLES</h3>
-                     <div class="flex space-x-2">
-                         <button id="orient-h" class="w-full text-xs bg-cyan-600 font-bold py-2 rounded-md transition-colors opacity-50" disabled>Horizontal</button>
-                         <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
-                     </div>
-                     <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
-                     <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
-                </div>
+            <div class="flex flex-col space-y-3 mt-6">
+                 <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">CONTROLES</h3>
+                 <div class="flex space-x-2">
+                     <button id="orient-h" class="w-full text-xs bg-cyan-600 font-bold py-2 rounded-md transition-colors opacity-50" disabled>Horizontal</button>
+                     <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
+                 </div>
+                 <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
+                 <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
+            </div>
 
-                <div class="pt-4 text-xs text-gray-500 text-center">
+            <div class="pt-4 mt-6">
+                <p class="text-xs text-gray-500 text-center">
                     Simulación creada por 
                     <a href="https://aulaquest.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">
                         AulaQuest
                     </a>
-                </div>
+                </p>
             </div>
         </div>
     </div>
@@ -149,7 +154,6 @@
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
 
-            // Se reintroduce la lógica de reescalado para una mejor experiencia en móvil
             const isMobile = window.innerWidth < 768;
             if (orientation === 'vertical') {
                 scale = isMobile ? 15 : 20;
