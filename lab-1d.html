@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Laboratorio 1D - Adición de Vectores (Layout Corregido)</title>
+    <title>Laboratorio 1D - Adición de Vectores (Layout Definitivo)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
         }
-        /* El body es el contexto de posicionamiento y ocupa toda la pantalla */
+        /*
+          LA BASE CORRECTA:
+          Esto bloquea el scroll de la página entera, forzando a que el scroll
+          ocurra únicamente dentro de los elementos que designemos.
+        */
         html, body {
             height: 100vh;
-            width: 100vw;
-            overflow: hidden; /* Evita el scroll de la página principal */
+            overflow: hidden; 
         }
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
@@ -35,17 +38,21 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 relative"> <!-- Añadido 'relative' para el contexto de posicionamiento -->
+<body class="bg-gray-900 text-gray-200 h-screen">
 
-    <!-- Contenedor principal que se convierte en flex en escritorio -->
-    <div class="w-full h-full md:flex md:flex-row">
+    <!-- 
+      Contenedor principal con FLEXBOX, replicando la lógica del ejemplo que SÍ funciona.
+      - h-full: Ocupa el 100% del body (que es 100vh).
+      - flex flex-col: Apila los hijos verticalmente en móvil.
+      - md:flex-row: Los pone en horizontal en escritorio.
+    -->
+    <div class="w-full h-full flex flex-col md:flex-row">
         
         <!-- 
           Contenedor del Canvas
-          Móvil: Posición absoluta, fijado al 60% superior de la pantalla.
-          Escritorio: Vuelve a ser relativo para que funcione el flexbox.
+          - h-[60%]: Ocupa el 60% de la altura de su padre flex.
         -->
-        <div id="canvas-container" class="absolute top-0 left-0 w-full h-[60%] md:relative md:w-[75%] md:h-full">
+        <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -57,12 +64,14 @@
         </div>
 
         <!-- 
-          Panel de Control
-          Móvil: Posición absoluta, fijado al 40% inferior, con scroll.
-          Escritorio: Vuelve a ser relativo para que funcione el flexbox.
+          Panel de Control - LA SOLUCIÓN
+          - flex-1: Le dice al panel que ocupe TODO el espacio vertical restante (el 40%).
+          - min-h-0: Un truco de Flexbox INDISPENSABLE para que el overflow funcione correctamente en un hijo.
+          - overflow-y-auto: Habilita el scroll vertical cuando el contenido se desborda.
         -->
-        <div id="control-panel" class="absolute bottom-0 left-0 w-full h-[40%] bg-gray-800 p-4 border-t-2 border-cyan-800 overflow-y-auto md:relative md:w-[25%] md:h-full md:border-t-0 md:border-l-2">
-            <div class="space-y-6 pb-6">
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto">
+            <!-- Se ha aumentado el padding inferior (pb-12) para dar más espacio al final del scroll -->
+            <div class="space-y-6 pb-12">
                 <div class="bg-gray-900/50 p-3 rounded-lg">
                     <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
                     <div class="space-y-3">
@@ -88,7 +97,7 @@
                 </div>
 
                 <div class="flex flex-col space-y-3">
-                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">1VISTAS</h3>
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS</h3>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
