@@ -52,12 +52,13 @@
         </div>
 
         <!-- 
-          Panel de Control:
-          - En móvil (clases por defecto): Ocupa el 40% de la altura restante (h-[40%]).
-          - overflow-y-auto: Habilita el scroll vertical SIEMPRE que el contenido se desborde.
-          - En escritorio (md:): Cambia a altura completa y se convierte en un item flex.
+          Panel de Control - CORRECCIÓN FINAL Y DEFINITIVA
+          - flex-1: En un contenedor flex-col, esto hace que el elemento ocupe TODO el espacio vertical restante.
+          - min-h-0: Un "truco" de flexbox necesario para permitir que un elemento se encoja y que el overflow funcione correctamente.
+          - overflow-y-auto: Habilita el scroll vertical cuando el contenido interno es más alto que el propio panel.
+          - Se eliminaron las alturas fijas (como h-[40%]) que causaban el problema.
         -->
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 w-full h-[40%] md:h-full md:w-auto md:flex-1 overflow-y-auto">
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto">
             <div class="space-y-6 pb-6">
                 <div class="bg-gray-900/50 p-3 rounded-lg">
                     <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
@@ -84,7 +85,7 @@
                 </div>
 
                 <div class="flex flex-col space-y-3">
-                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS22</h3>
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS</h3>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
