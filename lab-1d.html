@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Laboratorio 1D - Adición de Vectores</title>
+    <title>Laboratorio 1D - Adición de Vectores (Layout Corregido)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
         }
-        /* Esencial: Bloquea el scroll de la página entera para forzarlo dentro del panel */
+        /* El body es el contexto de posicionamiento y ocupa toda la pantalla */
         html, body {
-            height: 100vh; /* Ocupa toda la altura de la ventana */
-            overflow: hidden; /* Deshabilita el scroll global */
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* Evita el scroll de la página principal */
         }
         #canvas-container { cursor: grab; }
         #canvas-container.grabbing { cursor: grabbing; }
@@ -34,13 +35,17 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200">
+<body class="bg-gray-900 text-gray-200 relative"> <!-- Añadido 'relative' para el contexto de posicionamiento -->
 
-    <!-- Contenedor principal: Ocupa el 100% del body (100vh) y organiza los elementos -->
-    <div class="w-full h-full flex flex-col md:flex-row">
+    <!-- Contenedor principal que se convierte en flex en escritorio -->
+    <div class="w-full h-full md:flex md:flex-row">
         
-        <!-- Contenedor del Canvas: Altura explícita del 60% en móvil -->
-        <div id="canvas-container" class="relative w-full h-[60%] md:h-full md:w-[75%]">
+        <!-- 
+          Contenedor del Canvas
+          Móvil: Posición absoluta, fijado al 60% superior de la pantalla.
+          Escritorio: Vuelve a ser relativo para que funcione el flexbox.
+        -->
+        <div id="canvas-container" class="absolute top-0 left-0 w-full h-[60%] md:relative md:w-[75%] md:h-full">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -52,13 +57,11 @@
         </div>
 
         <!-- 
-          Panel de Control - CORRECCIÓN FINAL Y DEFINITIVA
-          - flex-1: En un contenedor flex-col, esto hace que el elemento ocupe TODO el espacio vertical restante.
-          - min-h-0: Un "truco" de flexbox necesario para permitir que un elemento se encoja y que el overflow funcione correctamente.
-          - overflow-y-auto: Habilita el scroll vertical cuando el contenido interno es más alto que el propio panel.
-          - Se eliminaron las alturas fijas (como h-[40%]) que causaban el problema.
+          Panel de Control
+          Móvil: Posición absoluta, fijado al 40% inferior, con scroll.
+          Escritorio: Vuelve a ser relativo para que funcione el flexbox.
         -->
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto">
+        <div id="control-panel" class="absolute bottom-0 left-0 w-full h-[40%] bg-gray-800 p-4 border-t-2 border-cyan-800 overflow-y-auto md:relative md:w-[25%] md:h-full md:border-t-0 md:border-l-2">
             <div class="space-y-6 pb-6">
                 <div class="bg-gray-900/50 p-3 rounded-lg">
                     <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
@@ -85,7 +88,7 @@
                 </div>
 
                 <div class="flex flex-col space-y-3">
-                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS</h3>
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">1VISTAS</h3>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
                     <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
