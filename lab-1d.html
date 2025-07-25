@@ -36,39 +36,21 @@
 </head>
 <body class="bg-gray-900 text-gray-200 h-screen">
 
-    <!-- 
-      NUEVA ESTRUCTURA (A PRUEBA DE FALLOS):
-      - Se usa Flexbox, que es ideal para este tipo de layout.
-      - 'flex flex-col' apila el canvas y el panel en vertical para móviles.
-      - 'md:flex-row' los pone uno al lado del otro en pantallas grandes.
-    -->
-    <div class="w-full h-full flex flex-col md:flex-row">
+    <div class="w-full h-full flex flex-col md:flex-row min-h-0">
         
-        <!-- Contenedor del Canvas -->
-        <!-- Ocupa el 60% de la altura en móvil y el 75% del ancho en escritorio. -->
         <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
-                <!-- Contenido dinámico aquí -->
-            </div>
+                </div>
             <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
                 <button id="zoom-in-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">+</button>
                 <button id="zoom-out-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">-</button>
             </div>
         </div>
 
-        <!--   
-          Panel de Control (LA MAGIA ESTÁ AQUÍ):
-          - 'h-[40%]': Ocupa el 40% de la altura en móvil.
-          - 'md:flex-1': Ocupa el espacio que sobra en escritorio (ancho).
-          - 'min-h-0': Permite que el panel se encoja si es necesario.
-          - 'flex flex-col': Hace que el propio panel sea un contenedor flex en columna.
-        -->
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 h-[40%] min-h-0 md:flex-1 flex flex-col">
-            <!-- Nuevo div interno para el scroll -->
-            <div class="flex-1 overflow-y-auto">
-                <!-- El contenido original del panel se mueve aquí -->
-                <div class="space-y-6 pb-6">
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 h-[40%] md:h-full md:flex-1 flex flex-col min-h-0">
+            <div class="flex-1 overflow-y-auto pb-6">
+                <div class="space-y-6">
                     <div class="bg-gray-900/50 p-3 rounded-lg">
                         <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
                         <div class="space-y-3">
@@ -94,7 +76,7 @@
                     </div>
 
                     <div class="flex flex-col space-y-3">
-                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS</h3>
+                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAAS</h3>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
@@ -107,18 +89,7 @@
                             <button id="orient-v" class="w-full text-xs bg-gray-600 hover:bg-gray-500 font-bold py-2 rounded-md transition-colors">Vertical</button>
                         </div>
                         <button id="reset-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reiniciar</button>
-                        <!-- Nuevo botón para la API de Gemini -->
-                        <button id="generate-scenario-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Generar Escenario ✨</button>
                         <a href="/suma-de-vectores/index.html" class="w-full mt-2 block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Volver a inicio</a>
-                    </div>
-
-                    <!-- Nueva sección para mostrar el escenario generado de forma persistente -->
-                    <div class="flex flex-col space-y-3">
-                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">ESCENARIO GENERADO</h3>
-                        <div id="persistent-scenario-display" class="bg-gray-900/50 p-3 rounded-lg text-sm text-gray-300 hidden">
-                            <p id="scenario-text" class="mb-2"></p>
-                            <div id="scenario-loading" class="text-center text-cyan-400 hidden">Cargando escenario...</div>
-                        </div>
                     </div>
 
                     <div class="pt-4 text-xs text-gray-500 text-center">
@@ -150,13 +121,6 @@
         const sourceVectors = document.querySelectorAll('.source-vector');
         const zoomInBtn = document.getElementById('zoom-in-btn');
         const zoomOutBtn = document.getElementById('zoom-out-btn');
-
-        // Nuevos elementos para la API de Gemini (ahora persistentes en el panel)
-        const generateScenarioBtn = document.getElementById('generate-scenario-btn');
-        const persistentScenarioDisplay = document.getElementById('persistent-scenario-display'); // Nuevo elemento
-        const scenarioText = document.getElementById('scenario-text');
-        const scenarioLoading = document.getElementById('scenario-loading');
-
 
         let scale = 40;
         let origin = { x: 0, y: 0 };
@@ -542,49 +506,6 @@
 
         window.addEventListener('resize', init);
         
-        // --- LLM Integration ---
-        async function generateApplicationScenario() {
-            persistentScenarioDisplay.classList.remove('hidden'); // Show the persistent display section
-            scenarioLoading.classList.remove('hidden');
-            scenarioText.textContent = ''; // Clear previous text
-
-            const prompt = "Genera un escenario de la vida real muy breve y simple donde se utilice la suma de vectores en una dimensión. Enfócate en un solo ejemplo claro y conciso, de no más de 30 palabras.";
-
-            let chatHistory = [];
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-
-            const payload = { contents: chatHistory };
-            const apiKey = ""; // Canvas will provide this at runtime
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    scenarioText.textContent = text;
-                } else {
-                    scenarioText.textContent = "No se pudo generar el escenario. Inténtalo de nuevo.";
-                    console.error("Gemini API response structure unexpected:", result);
-                }
-            } catch (error) {
-                scenarioText.textContent = "Error al conectar con la API de Gemini.";
-                console.error("Error calling Gemini API:", error);
-            } finally {
-                scenarioLoading.classList.add('hidden');
-            }
-        }
-
-        // Event listeners for LLM feature
-        generateScenarioBtn.addEventListener('click', generateApplicationScenario);
-
         // Carga inicial
         init();
     })();
