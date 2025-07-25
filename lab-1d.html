@@ -10,7 +10,6 @@
         body { 
             font-family: 'Inter', sans-serif; 
         }
-        /* Se restaura la altura a 100vh, que es lo que usan los ejemplos que funcionan */
         html, body {
             height: 100vh;
             overflow: hidden; 
@@ -34,18 +33,21 @@
         }
     </style>
 </head>
-<!-- El body solo tiene h-screen (height: 100vh) -->
 <body class="bg-gray-900 text-gray-200 h-screen">
 
     <!-- 
-      ESTE ES EL CAMBIO CLAVE:
-      Se añade un DIV que envuelve todo y es el que gestiona el layout flex.
-      Esto es exactamente como está en los ejemplos que sí funcionan.
+      Contenedor principal:
+      - 'relative' para que los hijos 'absolute' se posicionen respecto a él.
+      - En escritorio ('md:'), se convierte en un contenedor flex normal.
     -->
-    <div class="w-full h-full flex flex-col md:flex-row">
+    <div class="w-full h-full relative md:flex md:flex-row">
         
-        <!-- Contenedor del Canvas -->
-        <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
+        <!-- 
+          Contenedor del Canvas:
+          - En móvil, se posiciona de forma ABSOLUTA en el 60% superior de la pantalla.
+          - En escritorio, vuelve a un posicionamiento normal ('md:relative') y ocupa su columna.
+        -->
+        <div id="canvas-container" class="absolute top-0 left-0 w-full h-[60%] md:relative md:w-[75%] md:h-full">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
                 <!-- Contenido dinámico aquí -->
@@ -57,10 +59,12 @@
         </div>
 
         <!--  
-          Panel de Control: Con la estructura correcta, ahora las clases 'flex-1 min-h-0 overflow-y-auto'
-          funcionarán como se espera.
+          Panel de Control:
+          - En móvil, se posiciona de forma ABSOLUTA en el 40% inferior de la pantalla.
+          - Al tener una altura FIJA ('h-[40%]'), la clase 'overflow-y-auto' AHORA SÍ FUNCIONA.
+          - En escritorio, vuelve a un posicionamiento normal ('md:relative') y ocupa su columna.
         -->
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 min-h-0 overflow-y-auto md:w-[25%] md:flex-none">
+        <div id="control-panel" class="absolute bottom-0 left-0 w-full h-[40%] bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 overflow-y-auto md:relative md:w-[25%] md:h-full">
             <div class="space-y-6 pb-6">
                 <div class="bg-gray-900/50 p-3 rounded-lg">
                     <h3 class="text-sm font-bold text-center mb-2">Arrastra un Vector</h3>
@@ -479,7 +483,7 @@
             orientHBtn.classList.toggle('opacity-50', isHorizontal);
             orientHBtn.disabled = isHorizontal;
             orientVBtn.classList.toggle('opacity-50', !isHorizontal);
-            orientHBtn.disabled = !isHorizontal;
+            orientVBtn.disabled = !isHorizontal;
             orientHBtn.classList.toggle('bg-cyan-600', isHorizontal);
             orientVBtn.classList.toggle('bg-gray-600', isHorizontal);
             orientVBtn.classList.toggle('bg-cyan-600', !isHorizontal);
