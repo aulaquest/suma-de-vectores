@@ -36,19 +36,26 @@
 </head>
 <body class="bg-gray-900 text-gray-200 h-screen">
 
+    <!-- Contenedor principal con Flexbox -->
     <div class="w-full h-full flex flex-col md:flex-row min-h-0">
         
-        <div id="canvas-container" class="relative h-[60%] md:h-full md:w-[75%]">
+        <!-- Contenedor del Canvas (CORREGIDO) -->
+        <!-- Se añade 'flex-shrink-0' para evitar que se encoja. Mantiene su altura del 60% en móvil. -->
+        <div id="canvas-container" class="relative h-[60%] flex-shrink-0 md:h-full md:w-[75%]">
             <canvas id="vectorCanvas"></canvas>
             <div id="component-display" class="absolute bottom-4 right-4 z-20 bg-gray-900/80 text-gray-200 p-1.5 rounded-lg shadow-lg hidden flex-wrap items-center gap-x-2 text-xs backdrop-blur-sm border border-gray-700">
-                </div>
+                <!-- Contenido dinámico aquí -->
+            </div>
             <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
                 <button id="zoom-in-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">+</button>
                 <button id="zoom-out-btn" class="bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm text-white font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 text-lg shadow-lg">-</button>
             </div>
         </div>
 
-        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 h-[40%] md:h-full md:flex-1 flex flex-col min-h-0">
+        <!-- Panel de Control (CORREGIDO) -->
+        <!-- Se reemplaza 'h-[40%]' por 'flex-1'. Ahora el panel ocupa el espacio sobrante, lo que permite que el div interno con 'overflow-y-auto' funcione correctamente. -->
+        <div id="control-panel" class="bg-gray-800 p-4 border-t-2 md:border-t-0 md:border-l-2 border-cyan-800 flex-1 md:h-full flex flex-col min-h-0">
+            <!-- Div interno para el scroll. Funciona gracias a que su padre ahora tiene una altura flexible y definida. -->
             <div class="flex-1 overflow-y-auto pb-6">
                 <div class="space-y-6">
                     <div class="bg-gray-900/50 p-3 rounded-lg">
@@ -76,7 +83,7 @@
                     </div>
 
                     <div class="flex flex-col space-y-3">
-                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAAS</h3>
+                        <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-1">VISTAS</h3>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-values" class="form-checkbox mr-2">Mostrar Valores</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
@@ -105,8 +112,7 @@
     
     <script>
     (function() {
-        // El código Javascript no necesita cambios, ya que el problema era de maquetación (HTML/CSS).
-        // Se mantiene toda la lógica de la simulación.
+        // El código Javascript no necesita cambios, el problema era de maquetación (HTML/CSS).
         const canvas = document.getElementById('vectorCanvas');
         const ctx = canvas.getContext('2d');
         const canvasContainer = document.getElementById('canvas-container');
