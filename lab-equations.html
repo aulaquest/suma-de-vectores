@@ -52,6 +52,15 @@
             background-color: #06b6d4; /* cyan-600 */
             color: white;
         }
+        /* Ocultar las flechas en los inputs de tipo number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+          -webkit-appearance: none; 
+          margin: 0; 
+        }
+        input[type=number] {
+          -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 h-screen">
@@ -78,9 +87,10 @@
                     <button id="mode-polar-btn" class="px-3 py-1 text-xs font-medium rounded-md flex-1 text-center transition-colors duration-200 text-gray-300">Polares</button>
                 </div>
 
-                <!-- Panel de edición de vectores -->
-                <div class="bg-gray-900/50 p-3 rounded-lg">
-                    <div class="space-y-3">
+                <!-- Panel de edición de VECTORES BASE -->
+                <div>
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VECTORES BASE</h3>
+                    <div class="bg-gray-900/50 p-3 rounded-lg space-y-3">
                         <!-- Vector A -->
                         <div>
                             <div id="vector-a-cartesian" class="flex items-center space-x-2">
@@ -118,10 +128,35 @@
                     </div>
                 </div>
 
+                <!-- SECCIÓN DE OPERACIÓN -->
+                <div>
+                    <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">OPERACIÓN</h3>
+                    <div class="bg-gray-900/50 p-3 rounded-lg space-y-3">
+                         <div class="flex justify-center bg-gray-800 p-1 rounded-lg">
+                            <button id="op-sum-btn" class="px-3 py-1 text-xs font-medium rounded-md flex-1 text-center transition-colors duration-200">Suma</button>
+                            <button id="op-sub-btn" class="px-3 py-1 text-xs font-medium rounded-md flex-1 text-center transition-colors duration-200">Resta</button>
+                        </div>
+                        <div class="flex items-center justify-between space-x-2 text-gray-300">
+                            <div class="flex items-center space-x-1.5 flex-1">
+                                <input type="number" id="a-scalar" value="1" step="0.5" class="component-input">
+                                <span class="font-bold text-lg text-green-400">a</span>
+                            </div>
+                            <span id="op-symbol" class="text-xl font-medium px-1">+</span>
+                            <div class="flex items-center space-x-1.5 flex-1">
+                                <input type="number" id="b-scalar" value="1" step="0.5" class="component-input">
+                                <span class="font-bold text-lg text-blue-400">b</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="text-lg font-medium">=</span>
+                                <span class="font-bold text-lg text-fuchsia-500">R</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <h3 class="text-sm font-bold border-b border-gray-600 pb-1 mb-2">VISTAS</h3>
                     <div class="space-y-2">
-                        <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-sum" class="form-checkbox mr-2">Mostrar Suma (s)</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-grid" class="form-checkbox mr-2" checked>Mostrar Rejilla</label>
                         <label class="flex items-center text-xs cursor-pointer"><input type="checkbox" id="show-coords-on-canvas" class="form-checkbox mr-2">Coords. en Vector</label>
                     </div>
@@ -167,32 +202,39 @@
         const athetaInput = document.getElementById('atheta-input');
         const brInput = document.getElementById('br-input');
         const bthetaInput = document.getElementById('btheta-input');
+        
+        const aScalarInput = document.getElementById('a-scalar');
+        const bScalarInput = document.getElementById('b-scalar');
+        const opSymbol = document.getElementById('op-symbol');
+
         const aCartesianControls = document.getElementById('vector-a-cartesian');
         const aPolarControls = document.getElementById('vector-a-polar');
         const bCartesianControls = document.getElementById('vector-b-cartesian');
         const bPolarControls = document.getElementById('vector-b-polar');
         const modeCartesianBtn = document.getElementById('mode-cartesian-btn');
         const modePolarBtn = document.getElementById('mode-polar-btn');
-        const showSumCheck = document.getElementById('show-sum');
         const showGridCheck = document.getElementById('show-grid');
         const showCoordsOnCanvasCheck = document.getElementById('show-coords-on-canvas');
         const componentCheckboxes = document.querySelectorAll('input[name="component-type"]');
         const resetBtn = document.getElementById('reset-btn');
         const zoomInBtn = document.getElementById('zoom-in-btn');
         const zoomOutBtn = document.getElementById('zoom-out-btn');
+        const opSumBtn = document.getElementById('op-sum-btn');
+        const opSubBtn = document.getElementById('op-sub-btn');
 
         // --- ESTADO DE LA SIMULACIÓN ---
         let scale = 25;
         let origin = { x: 0, y: 0 };
         let coordinateMode = 'cartesian';
-        let vectorA = { id: 'a', value: {x: 2, y: 5}, pos: { x: 0, y: 0 }, color: '#48bb78' };
-        let vectorB = { id: 'b', value: {x: 6, y: 3}, pos: { x: 0, y: 0 }, color: '#4299e1' };
-        let sumVector = { id: 's', value: {x: 8, y: 8}, pos: { x: 0, y: 0 }, color: '#d946ef' };
-        let vectorsOnCanvas = [vectorA, vectorB];
+        let operation = 'sum';
+        // Vectores base (sin escalar)
+        let vectorA_base = { id: 'a', value: {x: 2, y: 5}, pos: { x: 0, y: 0 }, color: '#48bb78' };
+        let vectorB_base = { id: 'b', value: {x: 6, y: 3}, pos: { x: 0, y: 0 }, color: '#4299e1' };
+        let resultantVector = { id: 'R', value: {x: 8, y: 8}, pos: { x: 0, y: 0 }, color: '#d946ef' };
         let selectedVector = null;
         let isPanning = false;
         let panStart = { x: 0, y: 0 };
-        let isUpdating = false; // Flag para prevenir bucles de actualización
+        let isUpdating = false;
 
         // --- UTILIDADES ---
         function worldToCanvas(worldPos) { return { x: origin.x + worldPos.x * scale, y: origin.y - worldPos.y * scale }; }
@@ -332,19 +374,33 @@
             drawAxis();
             drawAxisLabels();
 
+            const scalarA = parseFloat(aScalarInput.value) || 0;
+            const scalarB = parseFloat(bScalarInput.value) || 0;
+            const scaledVectorA = { ...vectorA_base, value: { x: vectorA_base.value.x * scalarA, y: vectorA_base.value.y * scalarA } };
+            const scaledVectorB = { ...vectorB_base, value: { x: vectorB_base.value.x * scalarB, y: vectorB_base.value.y * scalarB } };
+
             const activeComponent = Array.from(componentCheckboxes).find(cb => cb.checked)?.id;
-            const vectorsToProcess = [...vectorsOnCanvas];
-            if (showSumCheck.checked) vectorsToProcess.push(sumVector);
+            const vectorsToProcess = [scaledVectorA, scaledVectorB, resultantVector];
 
             if (activeComponent) {
                 if (activeComponent === 'show-parallelogram') {
-                    const endA = getVectorEndCanvas(vectorA);
-                    const endB = getVectorEndCanvas(vectorB);
-                    const endSum = getVectorEndCanvas(sumVector);
                     ctx.save();
                     ctx.setLineDash([5, 5]); ctx.lineWidth = 2; ctx.globalAlpha = 0.7;
-                    ctx.strokeStyle = vectorB.color; ctx.beginPath(); ctx.moveTo(endA.x, endA.y); ctx.lineTo(endSum.x, endSum.y); ctx.stroke();
-                    ctx.strokeStyle = vectorA.color; ctx.beginPath(); ctx.moveTo(endB.x, endB.y); ctx.lineTo(endSum.x, endSum.y); ctx.stroke();
+                    if (operation === 'sum') {
+                        const endA = getVectorEndCanvas(scaledVectorA);
+                        const endB = getVectorEndCanvas(scaledVectorB);
+                        const endResultant = getVectorEndCanvas(resultantVector);
+                        ctx.strokeStyle = scaledVectorB.color; ctx.beginPath(); ctx.moveTo(endA.x, endA.y); ctx.lineTo(endResultant.x, endResultant.y); ctx.stroke();
+                        ctx.strokeStyle = scaledVectorA.color; ctx.beginPath(); ctx.moveTo(endB.x, endB.y); ctx.lineTo(endResultant.x, endResultant.y); ctx.stroke();
+                    } else { // Resta
+                        const vectorB_opposite = { ...scaledVectorB, value: {x: -scaledVectorB.value.x, y: -scaledVectorB.value.y}};
+                        const endA = getVectorEndCanvas(scaledVectorA);
+                        const endB_opposite = getVectorEndCanvas(vectorB_opposite);
+                        const endResultant = getVectorEndCanvas(resultantVector);
+                        
+                        ctx.strokeStyle = vectorB_base.color; ctx.beginPath(); ctx.moveTo(endA.x, endA.y); ctx.lineTo(endResultant.x, endResultant.y); ctx.stroke();
+                        ctx.strokeStyle = vectorA_base.color; ctx.beginPath(); ctx.moveTo(endB_opposite.x, endB_opposite.y); ctx.lineTo(endResultant.x, endResultant.y); ctx.stroke();
+                    }
                     ctx.restore();
                 } else {
                     vectorsToProcess.forEach(vec => {
@@ -411,12 +467,12 @@
         function updateStateFromCartesian() {
             if (isUpdating) return;
             isUpdating = true;
-            vectorA.value.x = parseFloat(axInput.value) || 0;
-            vectorA.value.y = parseFloat(ayInput.value) || 0;
-            vectorB.value.x = parseFloat(bxInput.value) || 0;
-            vectorB.value.y = parseFloat(byInput.value) || 0;
+            vectorA_base.value.x = parseFloat(axInput.value) || 0;
+            vectorA_base.value.y = parseFloat(ayInput.value) || 0;
+            vectorB_base.value.x = parseFloat(bxInput.value) || 0;
+            vectorB_base.value.y = parseFloat(byInput.value) || 0;
             updatePolarInputsFromState();
-            updateSumAndDraw();
+            updateResultantAndDraw();
             isUpdating = false;
         }
 
@@ -426,34 +482,34 @@
             const rA = parseFloat(arInput.value) || 0;
             const thetaADeg = parseFloat(athetaInput.value) || 0;
             const thetaARad = thetaADeg * Math.PI / 180;
-            vectorA.value.x = rA * Math.cos(thetaARad);
-            vectorA.value.y = rA * Math.sin(thetaARad);
+            vectorA_base.value.x = rA * Math.cos(thetaARad);
+            vectorA_base.value.y = rA * Math.sin(thetaARad);
 
             const rB = parseFloat(brInput.value) || 0;
             const thetaBDeg = parseFloat(bthetaInput.value) || 0;
             const thetaBRad = thetaBDeg * Math.PI / 180;
-            vectorB.value.x = rB * Math.cos(thetaBRad);
-            vectorB.value.y = rB * Math.sin(thetaBRad);
+            vectorB_base.value.x = rB * Math.cos(thetaBRad);
+            vectorB_base.value.y = rB * Math.sin(thetaBRad);
             updateCartesianInputsFromState();
-            updateSumAndDraw();
+            updateResultantAndDraw();
             isUpdating = false;
         }
 
         function updateCartesianInputsFromState() {
-            axInput.value = vectorA.value.x.toFixed(1);
-            ayInput.value = vectorA.value.y.toFixed(1);
-            bxInput.value = vectorB.value.x.toFixed(1);
-            byInput.value = vectorB.value.y.toFixed(1);
+            axInput.value = vectorA_base.value.x.toFixed(1);
+            ayInput.value = vectorA_base.value.y.toFixed(1);
+            bxInput.value = vectorB_base.value.x.toFixed(1);
+            byInput.value = vectorB_base.value.y.toFixed(1);
         }
 
         function updatePolarInputsFromState() {
-            const magA = Math.hypot(vectorA.value.x, vectorA.value.y);
-            const angleADeg = (Math.atan2(vectorA.value.y, vectorA.value.x) * 180 / Math.PI);
+            const magA = Math.hypot(vectorA_base.value.x, vectorA_base.value.y);
+            const angleADeg = (Math.atan2(vectorA_base.value.y, vectorA_base.value.x) * 180 / Math.PI);
             arInput.value = magA.toFixed(1);
             athetaInput.value = angleADeg.toFixed(0);
 
-            const magB = Math.hypot(vectorB.value.x, vectorB.value.y);
-            const angleBDeg = (Math.atan2(vectorB.value.y, vectorB.value.x) * 180 / Math.PI);
+            const magB = Math.hypot(vectorB_base.value.x, vectorB_base.value.y);
+            const angleBDeg = (Math.atan2(vectorB_base.value.y, vectorB_base.value.x) * 180 / Math.PI);
             brInput.value = magB.toFixed(1);
             bthetaInput.value = angleBDeg.toFixed(0);
         }
@@ -463,9 +519,22 @@
             updatePolarInputsFromState();
         }
         
-        function updateSumAndDraw() {
-            sumVector.value.x = vectorA.value.x + vectorB.value.x;
-            sumVector.value.y = vectorA.value.y + vectorB.value.y;
+        function updateResultantAndDraw() {
+            const scalarA = parseFloat(aScalarInput.value) || 0;
+            const scalarB = parseFloat(bScalarInput.value) || 0;
+
+            const scaledAx = vectorA_base.value.x * scalarA;
+            const scaledAy = vectorA_base.value.y * scalarA;
+            const scaledBx = vectorB_base.value.x * scalarB;
+            const scaledBy = vectorB_base.value.y * scalarB;
+
+            if (operation === 'sum') {
+                resultantVector.value.x = scaledAx + scaledBx;
+                resultantVector.value.y = scaledAy + scaledBy;
+            } else { // 'subtraction'
+                resultantVector.value.x = scaledAx - scaledBx;
+                resultantVector.value.y = scaledAy - scaledBy;
+            }
             draw();
         }
 
@@ -482,12 +551,31 @@
             draw();
         }
 
+        function setOperation(newOp) {
+            operation = newOp;
+            const isSum = newOp === 'sum';
+            opSumBtn.classList.toggle('mode-btn-active', isSum);
+            opSubBtn.classList.toggle('mode-btn-active', !isSum);
+            opSymbol.textContent = isSum ? '+' : '−';
+            updateResultantAndDraw();
+        }
+
         function updateComponentDisplay() {
-            const targetVector = selectedVector || sumVector;
+            const scalarA = parseFloat(aScalarInput.value) || 0;
+            const scalarB = parseFloat(bScalarInput.value) || 0;
+            const scaledVectorA = { ...vectorA_base, value: { x: vectorA_base.value.x * scalarA, y: vectorA_base.value.y * scalarA } };
+            const scaledVectorB = { ...vectorB_base, value: { x: vectorB_base.value.x * scalarB, y: vectorB_base.value.y * scalarB } };
+            
+            const targetVector = selectedVector || resultantVector;
             if (targetVector) {
-                const vx = targetVector.value.x;
-                const vy = targetVector.value.y;
-                let contentHTML = `<span class="font-bold" style="color: ${targetVector.color};">${targetVector.id.toUpperCase()} = </span>`;
+                // Si el vector seleccionado es A o B, usa su versión escalada para el display
+                let displayVector = targetVector;
+                if (targetVector.id === 'a') displayVector = scaledVectorA;
+                if (targetVector.id === 'b') displayVector = scaledVectorB;
+
+                const vx = displayVector.value.x;
+                const vy = displayVector.value.y;
+                let contentHTML = `<span class="font-bold" style="color: ${displayVector.color};">${displayVector.id.toUpperCase()} = </span>`;
                 if (coordinateMode === 'polar') {
                     const mag = Math.hypot(vx, vy).toFixed(1);
                     let angle = (Math.atan2(vy, vx) * 180 / Math.PI).toFixed(0);
@@ -522,9 +610,18 @@
             if (e.type === 'touchstart') e.preventDefault();
             const pos = getMousePos(e);
             let clickedOnItem = null;
-            const allDrawableVectors = [...vectorsOnCanvas, sumVector];
+
+            const scalarA = parseFloat(aScalarInput.value) || 0;
+            const scalarB = parseFloat(bScalarInput.value) || 0;
+            const scaledVectorA = { ...vectorA_base, value: { x: vectorA_base.value.x * scalarA, y: vectorA_base.value.y * scalarA } };
+            const scaledVectorB = { ...vectorB_base, value: { x: vectorB_base.value.x * scalarB, y: vectorB_base.value.y * scalarB } };
+            
+            const allDrawableVectors = [scaledVectorA, scaledVectorB, resultantVector];
             for (let i = allDrawableVectors.length - 1; i >= 0; i--) {
-                if (isClickOnVector(pos, allDrawableVectors[i])) { clickedOnItem = allDrawableVectors[i]; break; }
+                if (isClickOnVector(pos, allDrawableVectors[i])) { 
+                    clickedOnItem = allDrawableVectors[i]; 
+                    break; 
+                }
             }
             selectedVector = clickedOnItem;
             if (!selectedVector) {
@@ -568,28 +665,35 @@
         }
         
         function init() {
-            // Reset scale based on screen width for a better initial zoom on desktop
             scale = window.innerWidth > 768 ? 40 : 25;
-
-            // Reset vectors to their initial state
-            vectorA.value.x = 2;
-            vectorA.value.y = 5;
-            vectorB.value.x = 6;
-            vectorB.value.y = 3;
+            vectorA_base.value.x = 2;
+            vectorA_base.value.y = 5;
+            vectorB_base.value.x = 6;
+            vectorB_base.value.y = 3;
+            
+            aScalarInput.value = 1;
+            bScalarInput.value = 1;
             
             setCoordinateMode('cartesian');
+            setOperation('sum');
             updateAllInputsFromState();
-            updateSumAndDraw();
+            updateResultantAndDraw();
             handleResize();
         }
 
+        // --- EVENT LISTENERS ---
         [axInput, ayInput, bxInput, byInput].forEach(input => input.addEventListener('input', updateStateFromCartesian));
         [arInput, athetaInput, brInput, bthetaInput].forEach(input => input.addEventListener('input', updateStateFromPolar));
         
+        [aScalarInput, bScalarInput].forEach(input => input.addEventListener('input', updateResultantAndDraw));
+
         modeCartesianBtn.addEventListener('click', () => setCoordinateMode('cartesian'));
         modePolarBtn.addEventListener('click', () => setCoordinateMode('polar'));
 
-        [showSumCheck, showGridCheck, showCoordsOnCanvasCheck].forEach(el => el.addEventListener('change', draw));
+        opSumBtn.addEventListener('click', () => setOperation('sum'));
+        opSubBtn.addEventListener('click', () => setOperation('subtraction'));
+
+        [showGridCheck, showCoordsOnCanvasCheck].forEach(el => el.addEventListener('change', draw));
         
         componentCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
